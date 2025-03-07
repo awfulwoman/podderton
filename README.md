@@ -21,18 +21,19 @@ Go to whever you've installed go to <http://127.0.0.1:9988> (or whatever URL you
 
 ## Usage
 
-A file called `feeds.yaml` should be placed in `<yourpath>/config/` i.e `<yourpath>/config/feeds.yaml`.
+A file called `feeds.yaml` is found in `<yourpath>/config/` i.e `<yourpath>/config/feeds.yaml`.
 
-To get started the file should contain something like this:
+At a minimum the file should contain something like this:
 
 ```yaml
-feeds:
-  - name: Three Bean Salad
-    id: threebeansalad
-    url: https://podcast.global.com/show/5234547/episodes/feed
+input:
+  feeds:
+    - name: Three Bean Salad
+      id: threebeansalad
+      url: https://podcast.global.com/show/5234547/episodes/feed
 ```
 
-Once the container is restarted Podderton will download these feeds and you will have <http://127.0.0.1:9988/feeds.xml> available to subscribe to via your podcast player of choice. Neat! 
+Once the container is restarted Podderton will query any feeds that it finds, download them, and make a feed available (<http://127.0.0.1:9988/feeds.xml>) for you subscribe to via your podcast player of choice. Neat! 
 
 If you look in your podcast directory you'll see a directory called `threebeansalad` with audio files gradually getting downloaded.
 
@@ -41,11 +42,12 @@ If you look in your podcast directory you'll see a directory called `threebeansa
 Need to have a custom file format for saving files? 
 
 ```yaml
-feeds:
-  - name: Three Bean Salad
-    id: threebeansalad
-    url: https://podcast.global.com/show/5234547/episodes/feed
-    file_format: "{yyyy-mm-dd}.ext" # Make sure to quote this!
+input:
+  feeds:
+    - name: Three Bean Salad
+      id: threebeansalad
+      url: https://podcast.global.com/show/5234547/episodes/feed
+      file_format: "{yyyy-mm-dd}.ext" # Make sure to quote this!
 ```
 
 Want to alter the file format? Eeek, sorry, but Podderton isn't yet smart enough to rename already existing files. You'll need to handle that yourself.
@@ -55,19 +57,21 @@ Want to alter the file format? Eeek, sorry, but Podderton isn't yet smart enough
 Want to create custom feeds?
 
 ```yaml
-feeds:
-  - name: Three Bean Salad
-    id: threebeansalad 
-    url: https://podcast.global.com/show/5234547/episodes/feed
-  - name: Beef and Dairy Network
-    id: beef
-    url: https://feeds.simplecast.com/4NOSW3hj
+input: 
+  feeds:
+    - name: Three Bean Salad
+      id: threebeansalad 
+      url: https://podcast.global.com/show/5234547/episodes/feed
+    - name: Beef and Dairy Network
+      id: beef
+      url: https://feeds.simplecast.com/4NOSW3hj
 output:
-  - name: Funny Stuff
-    id: funnystuff
-    feeds:
-      - threebeansalad
-      - beef
+  feeds:
+    - name: Funny Stuff
+      id: funnystuff
+      feeds:
+        - threebeansalad
+        - beef
 ```
 
 This custom feed will be available at <http://127.0.0.1:9988/funnystuff.xml>. Don't worry, it will also be listed on the webpage.
@@ -77,18 +81,27 @@ This custom feed will be available at <http://127.0.0.1:9988/funnystuff.xml>. Do
 Want to change how often Podderton checks feeds? Add a cron-based schedule!
 
 ```yaml
-schedule: "0 * * * *" # Quotes necessary here
+input:
+  schedule: "0 * * * *" # Quotes necessary here
 ```
 
 You can also add a schedule for an individual feed.
 
 ```yaml
-schedule: "0 * * * *"
-feeds:
-  - name: Three Bean Salad
-    id: threebeansalad 
-    schedule: "0 30 * * *" # This will override the globale schedule
-    url: https://podcast.global.com/show/5234547/episodes/feed
+input:
+  schedule: "0 * * * *"
+  feeds:
+    - name: Three Bean Salad
+      id: threebeansalad 
+      schedule: "0 30 * * *" # This will override the globale schedule
+      url: https://podcast.global.com/show/5234547/episodes/feed
+```
+
+### Feed refresh
+
+```yaml
+output:
+  refresh: 5m # or 2h, 30s, or 1w if you're chill
 ```
 
 ### Misc
@@ -96,7 +109,15 @@ feeds:
 Don't want the webpage to be generated?
 
 ```yaml
-webpage: false
+webpage: 
+  display: false
+```
+
+Don't want any feeds? 
+
+```yaml
+output: 
+  feeds: false
 ```
 
 ## Internals
