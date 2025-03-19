@@ -47,7 +47,7 @@ input:
     - name: Three Bean Salad
       id: threebeansalad
       url: https://podcast.global.com/show/5234547/episodes/feed
-      file_format: "{yyyy-mm-dd}.ext" # Make sure to quote this!
+      file_format: "{yyyy-mm-dd}.ext" # .ext will be replaced by whatever extension the feed provides.
 ```
 
 Want to alter the file format? Eeek, sorry, but Podderton isn't yet smart enough to rename already existing files. You'll need to handle that yourself.
@@ -65,6 +65,9 @@ input:
     - name: Beef and Dairy Network
       id: beef
       url: https://feeds.simplecast.com/4NOSW3hj
+    - name: THe Rest is Politics
+      id: restispolitics
+      url: https://feeds.megaphone.fm/GLT9190936013
 output:
   feeds:
     - name: Funny Stuff
@@ -72,6 +75,10 @@ output:
       feeds:
         - threebeansalad
         - beef
+    - name: Boring stuff
+      id: boring
+      feeds:
+        - restispolitics
 ```
 
 This custom feed will be available at <http://127.0.0.1:9988/funnystuff.xml>. Don't worry, it will also be listed on the webpage.
@@ -106,7 +113,7 @@ output:
 
 ### Misc
 
-Don't want the webpage to be generated?
+Don't want the utility webpage to be generated?
 
 ```yaml
 webpage: 
@@ -149,6 +156,6 @@ Podderton is written in Python. Why? I dunno.
 
 ## Disclaimer
 
-This is a very part time project by someone who is quite overworked, so don't expect massive changes to happen. However PRs are always welcome!
+This is a very scratch-your-own-itch,very  part-time project by someone who is quite overworked, so please don't expect huge development to happen. However, PRs are always welcome!
 
 Yes, I like Three Bean Salad.
