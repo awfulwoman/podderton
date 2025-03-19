@@ -97,7 +97,7 @@ input:
       url: https://podcast.global.com/show/5234547/episodes/feed
 ```
 
-### Feed refresh
+### Output feed refresh
 
 ```yaml
 output:
@@ -113,11 +113,32 @@ webpage:
   display: false
 ```
 
-Don't want any feeds? 
+Don't want any outputted feeds? 
 
 ```yaml
 output: 
   feeds: false
+```
+
+Want to disable the default output feed?
+
+```yaml
+output: 
+  type: false
+```
+
+Want to combine all the feeds into one output feed?
+
+```yaml
+output: 
+  type: combined
+```
+
+Want to have a separate output feed for each input feed?
+
+```yaml
+output: 
+  type: separate # default
 ```
 
 ## Internals
