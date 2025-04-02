@@ -11,36 +11,24 @@ def subscriptions(configuration):
     # Extract the subscriptions from the configuration
     return configuration.get("subscribe", {}).get("feeds", [])
 
-def simplify_metadata(meta):
+def simplify_metadata(remote_feed, configured_feed):
     """Ensure the feed metadata exists."""
 
-    pprint.pprint(meta)    
-
-    if 'title' not in meta or not meta.title:
+    if 'title' not in remote_feed or not remote_feed.title:
         raise Exception(f"No valid title exists.")       
-    if 'summary' not in meta or not meta.summary:
+    if 'summary' not in remote_feed or not remote_feed.summary:
         raise Exception(f"No valid summary exists.")
 
     data = {
-        "title": meta.title,
-        "summary": meta.summary,
-        "url": feed['url']
+        "title": remote_feed.title,
+        "summary": remote_feed.summary,
+        "url": configured_feed['url']
     }
-    
-    # file_name = os.path.join(
-    #     utils.return_configuration_basepath(configuration),
-    #     feed['id'],
-    #     # feed['id'] + ".json"
-    #     "description.json"
-    # )
-
-    # with open(file_name, 'w', encoding='utf-8') as f:
-    #     json.dump(data, f, ensure_ascii=False, indent=4)
 
     return data
 
 
-def meta(feed_url):
+def get_meta(feed_url):
     """Fetch the feed metadata from the given feed URL."""
     
     response = requests.get(feed_url)
@@ -49,7 +37,7 @@ def meta(feed_url):
     else:
         raise Exception(f"Failed to fetch {feed_url}: {response.status_code}")
     
-def entries(feed_url):
+def get_entries(feed_url):
     """Fetch the feed entries from the given feed URL."""
     
     response = requests.get(feed_url)
@@ -61,23 +49,24 @@ def entries(feed_url):
 
 def main(config_file):
     cfg = config.file(config_file)
-    feeds = subscriptions(cfg)
+    configured_feeds = subscriptions(cfg)
     
     if files.write_dir(config.basepath(cfg)):
         print("Base directory prepared.")
         
     
-    for feed in feeds:
-        feed_dir = os.path.join(config.basepath(cfg), feed.get("id"))
+    for configured_feed in configured_feeds:
+        feed_dir = os.path.join(config.basepath(cfg), configured_feed.get("id"))
         if files.write_dir(feed_dir):
-            print(f"Directory for {feed.get('name')} prepared.")
+            print(f"Directory for {configured_feed.get('name')} prepared.")
 
-        feed_json = meta(feed.get("url"))
-        if files.write_json(feed_json, os.path.join(config.basepath(cfg), feed.get("id"), "original.json")):
-            print(f"Original metadata for {feed.get('name')} written.")
+        feed_json = get_meta(configured_feed.get("url"))
+        if files.write_json(feed_json, os.path.join(config.basepath(cfg), configured_feed.get("id"), "original.json")):
+            print(f"Original metadata for {configured_feed.get('name')} written.")
         
-        
-            
+        simplified_meta = simplify_metadata(feed_json, configured_feed)
+        if files.write_json(simplified_meta, os.path.join(config.basepath(cfg), configured_feed.get("id"), "feed.json")):
+            print(f"Simplified metadata for {configured_feed.get('name')} written.")            
 
         # Write the feed metadata to a JSON file
             # Title
@@ -99,7 +88,3 @@ def main(config_file):
             # download the entry's audio asset
             # download the entry's description to json
             # download the entry's image asset
-
-
-
-
