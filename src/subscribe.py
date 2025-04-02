@@ -1,5 +1,7 @@
+import config
 from requests import get
 import feedparser
+import pprint
 
 
 def get_feed_meta(feed_url):
@@ -52,3 +54,32 @@ def extract_image_url(entry):
             return entry.image.href
     return None
 
+
+def prepare_filesystem():
+    """Prepare the filesystem for storing downloaded assets."""
+    # Create a directory for storing downloaded assets
+    
+
+def create_feed_directory(feed):
+    """Create a directory for the feed."""
+    # Create a directory for the feed
+    
+
+def main(config_file):
+    configuration = config.get(config_file)
+    feeds = config.subscriptions(configuration)
+
+    
+    prepare_filesystem(configuration)
+    
+    # for each feed...
+    # Get feed metadata
+    # create a directory for the feed
+    # download the feed's assets (images, description, etc.)
+    # loop over each entry in the feed
+    # download the entry's audio asset
+    # download the entry''s meta assets
+
+    for feed in feeds:
+        meta = get_feed_meta(feed['url'])
+        pprint.pprint(meta.title)

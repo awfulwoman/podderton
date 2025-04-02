@@ -1,4 +1,4 @@
-input: 
+subscribe: 
   feeds:
     - name: Three Bean Salad
       id: threebeansalad 
@@ -9,7 +9,7 @@ input:
     - name: THe Rest is Politics
       id: restispolitics
       url: https://feeds.megaphone.fm/GLT9190936013
-output:
+generate:
   feeds:
     - name: Funny Stuff
       id: funnystuff
