@@ -2,7 +2,7 @@ import subscribe
 
 def main(args):
     print("Welcome to Podderton!")
-    print("Config file: ", args[0])
+    print("Using configuration from:", args[0])
 
     subscribe.main(args[0])
     # generate.main(args[0])

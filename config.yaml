@@ -1,5 +1,5 @@
+path: ~/Code/podderton/assets
 subscribe:
-  path: ~/Code/podderton/assets
   feeds:
     - name: Three Bean Salad
       id: threebeansalad 

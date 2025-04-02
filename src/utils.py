@@ -33,16 +33,3 @@ def replace_string_tokens(string, tokens):
     for key, value in tokens.items():
         string = string.replace(f"{key}", value)
     return string
-
-def get_basepath_from_configuration(configuration):
-    """Get the base path from the configuration."""
-
-    if "subscribe" not in configuration or not configuration["subscribe"]:
-        raise Exception("No 'subscribe' section defined in the configuration.")
-    if "path" not in configuration["subscribe"] or not configuration["subscribe"]["path"]:
-        raise Exception("No valid path defined for storing downloaded assets.")
-
-    base_path = configuration["subscribe"]["path"]
-    base_path = os.path.expanduser(base_path)
-
-    return base_path
