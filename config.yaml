@@ -1,4 +1,5 @@
-subscribe: 
+subscribe:
+  path: ~/Code/podderton/assets
   feeds:
     - name: Three Bean Salad
       id: threebeansalad 
@@ -6,7 +7,7 @@ subscribe:
     - name: Beef and Dairy Network
       id: beef
       url: https://feeds.simplecast.com/4NOSW3hj
-    - name: THe Rest is Politics
+    - name: The Rest is Politics
       id: restispolitics
       url: https://feeds.megaphone.fm/GLT9190936013
 generate:
