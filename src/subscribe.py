@@ -5,8 +5,8 @@ import pprint
 
 
 def get_feed_meta(feed_url):
-    """Fetch the RSS feed metadata from the given URL."""
-    # Make a request to the URL and parse the RSS feed
+    """Fetch the feed metadata from the given feed URL."""
+    
     response = get(feed_url)
     if response.status_code == 200:
         return feedparser.parse(response.content).feed
@@ -14,8 +14,8 @@ def get_feed_meta(feed_url):
         raise Exception(f"Failed to fetch {feed_url}: {response.status_code}")
     
 def get_feed_entries(feed_url):
-    """Fetch the RSS feed entries from the given URL."""
-    # Make a request to the URL and parse the RSS feed
+    """Fetch the feed entries from the given feed URL."""
+    
     response = get(feed_url)
     if response.status_code == 200:
         return feedparser.parse(response.content).entries
@@ -24,9 +24,8 @@ def get_feed_entries(feed_url):
 
 
 def download_asset(url, location):
-    """Download an asset from the given URL."""
-    # Make a request to the URL and save the content to a file
-    
+    """Download an asset from the given URL and store it in the specified location."""
+       
     response = get(url)
     if response.status_code == 200:
         filename = url.split("/")[-1]
@@ -44,6 +43,7 @@ def download_asset(url, location):
     
 def extract_image_url(entry):
     """Extract the image URL from the RSS entry."""
+    
     # Check if the entry has an image attribute
     if hasattr(entry, "image"):
         # If the image attribute is a URL, return it
@@ -69,7 +69,7 @@ def main(config_file):
     configuration = config.get(config_file)
     feeds = config.subscriptions(configuration)
     
-    prepare_filesystem(configuration)
+    # prepare_filesystem(configuration)
     
     # for each feed...
     # Get feed metadata
