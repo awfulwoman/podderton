@@ -1,8 +1,4 @@
-import os
-import feedparser
-from requests import get  # noqa
 import pprint
-from urllib.parse import urljoin, urlparse
 import config
 import subscribe
 
