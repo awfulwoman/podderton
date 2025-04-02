@@ -1,0 +1,22 @@
+input: 
+  feeds:
+    - name: Three Bean Salad
+      id: threebeansalad 
+      url: https://podcast.global.com/show/5234547/episodes/feed
+    - name: Beef and Dairy Network
+      id: beef
+      url: https://feeds.simplecast.com/4NOSW3hj
+    - name: THe Rest is Politics
+      id: restispolitics
+      url: https://feeds.megaphone.fm/GLT9190936013
+output:
+  feeds:
+    - name: Funny Stuff
+      id: funnystuff
+      feeds:
+        - threebeansalad
+        - beef
+    - name: Boring stuff
+      id: boring
+      feeds:
+        - restispolitics

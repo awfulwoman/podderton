@@ -1,1 +1,15 @@
-feedparser
+annotated-types==0.7.0
+certifi==2025.1.31
+charset-normalizer==3.4.1
+feedparser==6.0.11
+idna==3.10
+pydantic==2.11.1
+pydantic_core==2.33.0
+PyYAML==6.0.2
+requests==2.32.3
+rss-parser==2.1.0
+sgmllib3k==1.0.0
+typing-inspection==0.4.0
+typing_extensions==4.13.0
+urllib3==2.3.0
+xmltodict==0.13.0
