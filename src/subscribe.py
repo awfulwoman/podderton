@@ -68,7 +68,6 @@ def create_feed_directory(feed):
 def main(config_file):
     configuration = config.get(config_file)
     feeds = config.subscriptions(configuration)
-
     
     prepare_filesystem(configuration)
     
