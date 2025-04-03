@@ -1,10 +1,11 @@
 import config
-import utils
 import files
 import os
 import feedparser
 import requests
 import pprint
+import validators
+import remote
 
 def subscriptions(configuration):
     """Get the subscriptions from the configuration."""
@@ -45,6 +46,19 @@ def get_entries(feed_url):
         return feedparser.parse(response.content).entries
     else:
         raise Exception(f"Failed to fetch {feed_url}: {response.status_code}")
+    
+def get_feed_image_url(meta):
+    """Fetch the image from the given feed URL."""
+
+    # Determine what represents the feed image
+
+    if validators.url(meta.image):
+        return validators.url
+
+    if validators.url(meta.image.href):
+        return meta.image.href
+    
+    return None
 
 
 def main(config_file):
@@ -56,22 +70,27 @@ def main(config_file):
         
     
     for configured_feed in configured_feeds:
+        feed_meta = get_meta(configured_feed.get("url"))
         feed_dir = os.path.join(config.basepath(cfg), configured_feed.get("id"))
+        
         if files.write_dir(feed_dir):
             print(f"Directory for {configured_feed.get('name')} prepared.")
 
-        feed_json = get_meta(configured_feed.get("url"))
-        if files.write_json(feed_json, os.path.join(config.basepath(cfg), configured_feed.get("id"), "original.json")):
+        if files.write_json(feed_meta, os.path.join(config.basepath(cfg), configured_feed.get("id"), "original.json")):
             print(f"Original metadata for {configured_feed.get('name')} written.")
         
-        simplified_meta = simplify_metadata(feed_json, configured_feed)
+        simplified_meta = simplify_metadata(feed_meta, configured_feed)
         if files.write_json(simplified_meta, os.path.join(config.basepath(cfg), configured_feed.get("id"), "feed.json")):
             print(f"Simplified metadata for {configured_feed.get('name')} written.")            
 
-        # Write the feed metadata to a JSON file
-            # Title
-            # Description
-        
+        feed_image_path = os.path.join(config.basepath(cfg), configured_feed.get("id"), "feed.jpg")
+        if not os.path.exists(feed_image_path):
+            feed_image_url = get_feed_image_url(feed_meta)
+            if feed_image_url:
+                if files.write_image(remote.get_file(feed_image_url), feed_image_path):
+                    print(f"Artwork for {configured_feed.get('name')} written.")   
+
+
         # Download the feed's assets (images, description, etc.)
 
         # entries = return_feed_entries(feed['url'])
