@@ -97,7 +97,7 @@ def generate_separate(base_path, subs_path, feeds_dir):
         feed_dir = os.path.join(subs_path, feed_id)
         if not os.path.isdir(feed_dir):
             continue
-        feed_json_path = os.path.join(feed_dir, 'feed.json')
+        feed_json_path = os.path.join(feed_dir, 'meta.json')
         if not os.path.exists(feed_json_path):
             continue
         with open(feed_json_path) as f:
@@ -118,12 +118,12 @@ def generate_separate(base_path, subs_path, feeds_dir):
 
 
 def get_all_feed_ids(subs_path):
-    """Return list of feed IDs (subdirs with feed.json) under subs_path."""
+    """Return list of feed IDs (subdirs with meta.json) under subs_path."""
     ids = []
     for feed_id in os.listdir(subs_path):
         feed_dir = os.path.join(subs_path, feed_id)
         if os.path.isdir(feed_dir):
-            if os.path.exists(os.path.join(feed_dir, 'feed.json')):
+            if os.path.exists(os.path.join(feed_dir, 'meta.json')):
                 ids.append(feed_id)
     return ids
 

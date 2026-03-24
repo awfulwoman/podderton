@@ -37,7 +37,7 @@ def listing_html(base_path, cfg):
             feed_dir = os.path.join(subs_path, feed_id)
             if not os.path.isdir(feed_dir):
                 continue
-            feed_json_path = os.path.join(feed_dir, 'feed.json')
+            feed_json_path = os.path.join(feed_dir, 'meta.json')
             if not os.path.exists(feed_json_path):
                 continue
             with open(feed_json_path) as f:

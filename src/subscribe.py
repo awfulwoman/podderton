@@ -76,11 +76,11 @@ def main(config_file):
         if files.write_dir(feed_dir):
             print(f"Directory for {configured_feed.get('name')} prepared.")
 
-        if files.write_json(feed_meta, os.path.join(feed_dir, "original.json")):
+        if files.write_json(feed_meta, os.path.join(feed_dir, "source.json")):
             print(f"Original metadata for {configured_feed.get('name')} written.")
 
         simplified_meta = simplify_metadata(feed_meta, configured_feed)
-        if files.write_json(simplified_meta, os.path.join(feed_dir, "feed.json")):
+        if files.write_json(simplified_meta, os.path.join(feed_dir, "meta.json")):
             print(f"Simplified metadata for {configured_feed.get('name')} written.")
 
         feed_image_path = os.path.join(feed_dir, "feed.jpg")
