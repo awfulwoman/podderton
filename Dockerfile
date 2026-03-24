@@ -13,4 +13,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 9988
 
 WORKDIR /app/src
-CMD ["python", "__main__.py", "/config/feeds.yaml"]
+CMD ["python", "-c", "print('Usage: specify run_subscriber.py or run_generator.py as command')"]

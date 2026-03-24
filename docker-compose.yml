@@ -1,8 +1,25 @@
 services:
-  podderton:
+  subscriber:
     build: .
+    command: ["python", "run_subscriber.py", "/config/feeds.yaml"]
+    volumes:
+      - ./config:/config:ro
+      - subscriptions:/subscriptions
+    environment:
+      - PODDERTON_PATH=/
+
+  generator:
+    build: .
+    command: ["python", "run_generator.py", "/config/feeds.yaml"]
     ports:
       - "9988:9988"
     volumes:
-      - ./config:/config
-      - ./podcasts:/podcasts
+      - ./config:/config:ro
+      - subscriptions:/subscriptions:ro
+      - feeds:/feeds
+    environment:
+      - PODDERTON_PATH=/
+
+volumes:
+  subscriptions:
+  feeds:

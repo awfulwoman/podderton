@@ -8,13 +8,29 @@ services:
     expose:
       - "8080"
 
-  podderton:
+  subscriber:
     build: .
+    command: ["python", "run_subscriber.py", "/config/feeds.yaml"]
+    volumes:
+      - ./config:/config:ro
+      - ./data/subscriptions:/subscriptions
+      - ./src:/app/src
+    environment:
+      - PODDERTON_PATH=/
+    depends_on:
+      - mock
+
+  generator:
+    build: .
+    command: ["python", "run_generator.py", "/config/feeds.yaml"]
     ports:
       - "9988:9988"
     volumes:
-      - ./config:/config
-      - ./podcasts:/podcasts
+      - ./config:/config:ro
+      - ./data/subscriptions:/subscriptions:ro
+      - ./data/feeds:/feeds
       - ./src:/app/src
+    environment:
+      - PODDERTON_PATH=/
     depends_on:
       - mock
