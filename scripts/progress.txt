@@ -6,6 +6,10 @@
 - sample_feed.xml has 3 episodes; episode 2 title contains `/`, `:`, `?` for sanitization testing
 - `{yyyy-mm-dd}` as a single token is NOT replaced by utils.py; real date pattern is `{yyyy}-{mmmm}-{dddd}` (returns unpadded ints: `2024-6-15`)
 - `define_string_tokens` date fields return raw integers (tm_year, tm_mon, tm_mday) — no zero-padding
+- RSS `<description>` in channel maps to `feed.subtitle` in feedparser, NOT `feed.summary` — use `<itunes:summary>` for the summary field
+- `simplify_metadata()` requires `feed.summary` — sample_feed.xml must have `<itunes:summary>` or tests will fail
+- For mocking objects with `'key' in obj` checks (feedparser FeedParserDict interface), use a dict subclass with `__getattr__`, not `types.SimpleNamespace`
+- `responses.add()` allows unlimited calls to same URL by default — no need to re-add for multiple calls in one test
 
 # Ralph Progress Log
 Milestone: test-core-functionality
@@ -23,6 +27,18 @@ Started: Tue 24 Mar 2026 14:44:50 CET
   - `validators` module used in subscribe.py but missing from requirements.txt — always install from both requirements.txt and requirements-dev.txt when setting up
   - conftest.py fixtures use tmp_path (pytest built-in) for temp dirs; config fixture writes YAML via PyYAML
   - sample_feed.xml episode 2 title has `/`, `:`, `?` chars — useful for sanitization tests
+---
+
+## [2026-03-24] - #12 Test feed download: parsing, episode download, and metadata storage
+- Created `tests/test_subscribe.py` with 10 tests (5 logical groups)
+- Added `<itunes:summary>` to `tests/fixtures/sample_feed.xml` (feedparser maps RSS `<description>` to `.subtitle`, not `.summary`)
+- Tests cover: get_meta, get_entries, get_feed_image_url, simplify_metadata, full download flow, idempotency
+- **Learnings for future iterations:**
+  - RSS channel `<description>` → feedparser `feed.subtitle`; need `<itunes:summary>` for `feed.summary`
+  - `simplify_metadata()` requires `feed.summary` to be populated — fixture needed updating
+  - Use a dict subclass with `__getattr__` (MockFeed pattern) to mock feedparser objects supporting `'key' in obj`
+  - `responses.add()` is unlimited by default — one add serves all calls to that URL
+  - `subscribe.main()` calls feed URL twice per run (get_meta + get_entries)
 ---
 
 ## [2026-03-24] - #13 Test file format: token replacement in utils.py
