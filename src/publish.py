@@ -115,14 +115,105 @@ def generate_separate(base_path):
         print(f"Generated feed: {out_path}")
 
 
+def get_all_feed_ids(base_path):
+    """Return list of feed IDs (subdirs with feed.json) under base_path."""
+    ids = []
+    for feed_id in os.listdir(base_path):
+        feed_dir = os.path.join(base_path, feed_id)
+        if os.path.isdir(feed_dir) and feed_id != 'feeds':
+            if os.path.exists(os.path.join(feed_dir, 'feed.json')):
+                ids.append(feed_id)
+    return ids
+
+
+def gather_items_for_feeds(base_path, feed_ids):
+    """Gather and return all episodes from the given feed IDs, sorted newest first."""
+    all_items = []
+    for feed_id in feed_ids:
+        feed_dir = os.path.join(base_path, feed_id)
+        if os.path.isdir(feed_dir):
+            all_items.extend(gather_feed_items(feed_dir, feed_id))
+    all_items.sort(key=lambda x: x['_ts'], reverse=True)
+    return all_items
+
+
+def generate_combined(base_path):
+    """Generate a single feeds/feeds.xml with all episodes from all feeds."""
+    feeds_dir = os.path.join(base_path, 'feeds')
+    files.write_dir(feeds_dir)
+
+    feed_ids = get_all_feed_ids(base_path)
+    all_items = gather_items_for_feeds(base_path, feed_ids)
+    tree = make_rss_feed(
+        title='Podderton Combined Feed',
+        description='All subscribed podcasts',
+        link='',
+        image_url=None,
+        items=all_items,
+    )
+    out_path = os.path.join(feeds_dir, 'feeds.xml')
+    tree.write(out_path, encoding='unicode', xml_declaration=True)
+    print(f"Generated feed: {out_path}")
+
+
+def generate_default_all(base_path):
+    """Generate feeds/feeds.xml as the default all-episodes feed."""
+    feeds_dir = os.path.join(base_path, 'feeds')
+    files.write_dir(feeds_dir)
+
+    feed_ids = get_all_feed_ids(base_path)
+    all_items = gather_items_for_feeds(base_path, feed_ids)
+    tree = make_rss_feed(
+        title='Podderton Combined Feed',
+        description='All subscribed podcasts',
+        link='',
+        image_url=None,
+        items=all_items,
+    )
+    out_path = os.path.join(feeds_dir, 'feeds.xml')
+    tree.write(out_path, encoding='unicode', xml_declaration=True)
+    print(f"Generated feed: {out_path}")
+
+
+def generate_custom_feeds(base_path, custom_feeds):
+    """Generate custom named feeds from config generate.feeds list."""
+    if not custom_feeds:
+        return
+    feeds_dir = os.path.join(base_path, 'feeds')
+    files.write_dir(feeds_dir)
+
+    for feed_cfg in custom_feeds:
+        name = feed_cfg.get('name', 'Custom Feed')
+        feed_id = feed_cfg.get('id', 'custom')
+        input_ids = feed_cfg.get('feeds', [])
+        items = gather_items_for_feeds(base_path, input_ids)
+        tree = make_rss_feed(
+            title=name,
+            description='',
+            link='',
+            image_url=None,
+            items=items,
+        )
+        out_path = os.path.join(feeds_dir, f'{feed_id}.xml')
+        tree.write(out_path, encoding='unicode', xml_declaration=True)
+        print(f"Generated custom feed: {out_path}")
+
+
 def main(config_file):
     cfg = config.file(config_file)
     base_path = config.basepath(cfg)
-    generate_type = cfg.get('generate', {}).get('type', 'separate')
+    generate_cfg = cfg.get('generate', {}) or {}
+    generate_type = generate_cfg.get('type', 'separate')
+    custom_feeds = generate_cfg.get('feeds', [])
 
-    if generate_type is False or str(generate_type).lower() == 'false':
-        print("Feed generation disabled.")
-        return
+    type_disabled = generate_type is False or str(generate_type).lower() == 'false'
 
-    if generate_type == 'separate' or generate_type is True:
-        generate_separate(base_path)
+    if not type_disabled:
+        if generate_type == 'combined':
+            generate_combined(base_path)
+        else:
+            # separate (default) — one XML per feed + default feeds.xml
+            generate_separate(base_path)
+            generate_default_all(base_path)
+
+    generate_custom_feeds(base_path, custom_feeds)
