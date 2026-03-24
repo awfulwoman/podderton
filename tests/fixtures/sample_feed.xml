@@ -6,6 +6,7 @@
     <title>Test Podcast</title>
     <description>A podcast for testing purposes.</description>
     <link>http://example.com</link>
+    <itunes:summary>A podcast for testing purposes.</itunes:summary>
     <image>
       <url>http://example.com/cover.jpg</url>
       <title>Test Podcast</title>
