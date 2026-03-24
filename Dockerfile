@@ -11,4 +11,5 @@ ENV PODDERTON_PATH=/podcasts
 
 EXPOSE 9988
 
-CMD ["python", "src/__main__.py", "/config/feeds.yaml"]
+WORKDIR /app/src
+CMD ["python", "__main__.py", "/config/feeds.yaml"]
