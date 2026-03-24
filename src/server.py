@@ -2,6 +2,7 @@ import config
 import json
 import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import unquote
 
 PORT = 9988
 _config_file = None
@@ -39,10 +40,11 @@ def listing_html(base_path, cfg):
         with open(feed_json_path) as f:
             meta = json.load(f)
         title = meta.get('title') or feed_id
+        episodes_dir = os.path.join(feed_dir, 'episodes')
         episode_count = sum(
-            1 for fn in os.listdir(feed_dir)
-            if fn.endswith('.json') and fn not in ('feed.json', 'original.json')
-        )
+            1 for fn in os.listdir(episodes_dir)
+            if fn.endswith('.json')
+        ) if os.path.isdir(episodes_dir) else 0
         artwork = f'/{feed_id}/feed.jpg' if os.path.exists(os.path.join(feed_dir, 'feed.jpg')) else ''
         xml_url = f'/feeds/{feed_id}.xml'
         img_tag = f'<img src="{artwork}" width="64" height="64" style="vertical-align:middle">' if artwork else ''
@@ -93,7 +95,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         cfg = config.file(_config_file)
         base_path = config.basepath(cfg)
-        path = self.path.split('?')[0]
+        path = unquote(self.path.split('?')[0])
 
         # Root listing page
         if path == '/':
@@ -126,12 +128,11 @@ class Handler(BaseHTTPRequestHandler):
             self.send_file(os.path.join(base_path, 'feeds', fname), 'application/rss+xml')
             return
 
-        # /<feed_id>/<file>
-        parts = path.lstrip('/').split('/', 1)
-        if len(parts) == 2:
-            feed_id, fname = parts
-            file_path = os.path.join(base_path, feed_id, fname)
-            self.send_file(file_path, get_mime(fname))
+        # /<feed_id>/... (files within feed directory)
+        parts = path.lstrip('/').split('/')
+        if len(parts) >= 2:
+            file_path = os.path.join(base_path, *parts)
+            self.send_file(file_path, get_mime(parts[-1]))
             return
 
         self.send_error(404, 'Not Found')

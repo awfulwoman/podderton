@@ -91,6 +91,8 @@ def main(config_file):
 
 
         # Download episode audio files
+        episodes_dir = os.path.join(feed_dir, "episodes")
+        files.write_dir(episodes_dir)
         file_format = configured_feed.get("file_format", "{title}.ext")
         entries = get_entries(configured_feed.get("url"))
 
@@ -126,7 +128,7 @@ def main(config_file):
             for ch in ['/', '\\', ':', '*', '?', '"', '<', '>', '|']:
                 filename = filename.replace(ch, '_')
 
-            filepath = os.path.join(feed_dir, filename)
+            filepath = os.path.join(episodes_dir, filename)
             if os.path.exists(filepath):
                 continue
 

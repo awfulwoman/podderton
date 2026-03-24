@@ -54,10 +54,13 @@ def make_rss_feed(title, description, link, image_url, items):
 def gather_feed_items(feed_dir, feed_id):
     """Scan a feed directory and return a list of episode dicts sorted by date desc."""
     items = []
-    for fname in os.listdir(feed_dir):
-        if not fname.endswith('.json') or fname in ('feed.json', 'original.json'):
+    episodes_dir = os.path.join(feed_dir, 'episodes')
+    if not os.path.isdir(episodes_dir):
+        return items
+    for fname in os.listdir(episodes_dir):
+        if not fname.endswith('.json'):
             continue
-        json_path = os.path.join(feed_dir, fname)
+        json_path = os.path.join(episodes_dir, fname)
         with open(json_path) as f:
             try:
                 ep = json.load(f)
@@ -67,12 +70,12 @@ def gather_feed_items(feed_dir, feed_id):
         # Find corresponding audio file
         audio_file = None
         for ext in ('.mp3', '.m4a', '.ogg', '.opus'):
-            candidate = os.path.join(feed_dir, stem + ext)
+            candidate = os.path.join(episodes_dir, stem + ext)
             if os.path.exists(candidate):
                 audio_file = stem + ext
                 break
-        enclosure_url = f'/{feed_id}/{audio_file}' if audio_file else ''
-        enclosure_length = os.path.getsize(os.path.join(feed_dir, audio_file)) if audio_file else 0
+        enclosure_url = f'/{feed_id}/episodes/{audio_file}' if audio_file else ''
+        enclosure_length = os.path.getsize(os.path.join(episodes_dir, audio_file)) if audio_file else 0
         items.append({
             'title': ep.get('title'),
             'summary': ep.get('summary'),
