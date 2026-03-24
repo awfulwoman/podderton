@@ -43,3 +43,16 @@ Started: Tue 24 Mar 2026 14:22:29 CET
   - Episode image: check `entry.image.href` first, then scan `entry.links` for type starting with `image/`
   - Use `os.path.splitext(filepath)[0]` to get stem for sibling files
 ---
+## [2026-03-24] - #5 Generate RSS XML output feeds (separate mode)
+- Implemented `src/publish.py` with RSS 2.0 XML generation using stdlib `xml.etree.ElementTree`
+- Scans each feed directory for episode JSON files, pairs with audio files for enclosure URLs
+- Episodes sorted by publish date (newest first) via `parse_date()` helper
+- `generate.type: false` skips generation; defaults to `"separate"` mode
+- Updated `__main__.py` to import and call `publish.main(args[0])`
+- Files changed: `src/publish.py`, `src/__main__.py`
+- **Learnings for future iterations:**
+  - Episode JSON files are named same as audio file stem (e.g., `episode.json` for `episode.mp3`)
+  - Skip `feed.json` and `original.json` when scanning for episode files
+  - `enclosure` URL uses format `/<feed_id>/<filename>` (relative, for future HTTP server)
+  - `feeds/` subdirectory must be created before writing XML files
+---
