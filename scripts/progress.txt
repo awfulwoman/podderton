@@ -56,3 +56,14 @@ Started: Tue 24 Mar 2026 14:22:29 CET
   - `enclosure` URL uses format `/<feed_id>/<filename>` (relative, for future HTTP server)
   - `feeds/` subdirectory must be created before writing XML files
 ---
+## [2026-03-24] - #6 Generate combined and custom named feeds
+- Added `generate_combined()` for `generate.type: combined` → single `feeds/feeds.xml`
+- Added `generate_custom_feeds()` for `generate.feeds[]` → one `<id>.xml` per custom feed
+- Added `generate_default_all()` → always writes `feeds/feeds.xml` in separate mode
+- Custom feeds generated regardless of `generate.type` (even `false`)
+- Files changed: `src/publish.py`
+- **Learnings for future iterations:**
+  - `generate_cfg.get('type', 'separate')` can return `None` if key is present but empty — cast defensively
+  - `generate.feeds` is a list of dicts with `name`, `id`, `feeds` (list of input feed IDs)
+  - `feeds.xml` is the default all-episodes feed referenced by README at `/feeds.xml`
+---
