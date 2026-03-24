@@ -8,13 +8,30 @@ There's no web interface - all configuration is done via YAML.
 
 ```yaml
 services:
-  podderton:
+  subscriber:
+    image: awfulwoman/podderton
+    command: ["python", "run_subscriber.py", "/config/feeds.yaml"]
+    volumes:
+      - "<yourpath>/config:/config:ro"
+      - subscriptions:/subscriptions
+    environment:
+      - PODDERTON_PATH=/
+
+  generator:
+    image: awfulwoman/podderton
+    command: ["python", "run_generator.py", "/config/feeds.yaml"]
     ports:
       - "9988:9988" # Change the first "9988" to whatever port you need
-    image: awfulwoman/podderton
     volumes:
-      - "<yourpath>/config:/config"
-      - "<yourpath>/podcasts:/podcasts"
+      - "<yourpath>/config:/config:ro"
+      - subscriptions:/subscriptions:ro
+      - feeds:/feeds
+    environment:
+      - PODDERTON_PATH=/
+
+volumes:
+  subscriptions:
+  feeds:
 ```
 
 Go to whever you've installed go to <http://127.0.0.1:9988> (or whatever URL you're using) and you should see a simple page listing the feeds. If a config file doesn't exist a default one will be created.
@@ -85,31 +102,16 @@ This custom feed will be available at <http://127.0.0.1:9988/funnystuff.xml>. Do
 
 ### Schedule
 
-Want to change how often Podderton checks feeds? Add a cron-based schedule!
+Want to change how often each service runs? Set the `interval` under `subscribe` and `generate`:
 
 ```yaml
 subscribe:
-  schedule: "0 * * * *" # Quotes necessary here
-```
-
-You can also add a schedule for an individual feed.
-
-```yaml
-subscribe:
-  schedule: "0 * * * *"
-  feeds:
-    - name: Three Bean Salad
-      id: threebeansalad
-      schedule: "0 30 * * *" # This will override the globale schedule
-      url: https://podcast.global.com/show/5234547/episodes/feed
-```
-
-### Output feed refresh
-
-```yaml
+  interval: "30m"  # How often to check for new episodes (default: 30m)
 generate:
-  refresh: 5m # or 2h, 30s, or 1w if you're chill
+  interval: "5m"   # How often to check for new downloads (default: 5m)
 ```
+
+These can also be set via environment variables: `PODDERTON_SUBSCRIBE_INTERVAL` and `PODDERTON_GENERATE_INTERVAL`.
 
 ### Misc
 
@@ -148,9 +150,18 @@ generate:
   type: separate # default
 ```
 
+## Architecture
+
+Podderton runs as two services:
+
+- **Subscriber**: checks configured feeds on a heartbeat interval, downloads new episodes, and writes a `.updated` signal file to the shared subscriptions volume when new content arrives.
+- **Generator**: detects the `.updated` signal file on its own heartbeat interval, regenerates RSS feeds when triggered, and serves HTTP on port 9988.
+
+The two services communicate via a `.updated` file on the shared subscriptions volume — the subscriber writes it, the generator reads and deletes it.
+
 ## Development
 
-For local development, use the dev compose file which mounts `src/` directly so code changes are reflected without rebuilding:
+For local development, use the dev compose file which starts all three services (mock feed server, subscriber, generator) and mounts `src/` directly so code changes are reflected without rebuilding:
 
 ```bash
 docker compose -f docker-compose.dev.yml up --build
