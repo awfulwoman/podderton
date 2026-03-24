@@ -1,6 +1,8 @@
 ## Codebase Patterns
 - Run tests with `.venv/bin/pytest` (not `python -m pytest`) — system Python on macOS lacks pytest
-- Always install both requirements.txt AND requirements-dev.txt: `validators` is used in src but only in dev requirements
+- Always install both requirements.txt AND requirements-dev.txt: `validators` is a runtime dep but was only in dev requirements — now fixed in requirements.txt
+- For E2E Docker tests: `subscribe.main()` downloads ALL episodes before server starts — use local HTTP server (via `host.docker.internal`) not real podcast feeds
+- Use `--add-host host.docker.internal:host-gateway` in `docker run` to let containers reach the test host
 - src/ modules import each other directly (no package prefix) — add `sys.path.insert(0, "src/")` in test files
 - conftest.py fixtures: `tmp_config` returns str path; `tmp_podcast_dir` returns pathlib.Path
 - sample_feed.xml has 3 episodes; episode 2 title contains `/`, `:`, `?` for sanitization testing
@@ -71,4 +73,16 @@ Started: Tue 24 Mar 2026 14:44:50 CET
   - server.main() uses hardcoded PORT=9988 and a global `_config_file` — only one server test can run per process
   - Daemon threads die when the test process ends — no explicit shutdown needed for the server test
   - publish.main() must be called after subscribe.main() before the server will show feed HTML (server reads feeds/ XML and feed directories)
+---
+
+## [2026-03-24] - #15 E2E Docker smoke test: container boots and serves feeds
+- Created `tests/test_e2e_docker.py` with full lifecycle test (build, run, verify, cleanup)
+- Fixed `requirements.txt`: added `validators==0.35.0` (runtime dep missing from image)
+- Used local `HTTPServer` in test thread serving minimal RSS + tiny MP3 via `host.docker.internal`
+- Test passes in ~13 seconds, skips if Docker unavailable, marked `@pytest.mark.e2e`
+- **Learnings for future iterations:**
+  - `subscribe.main()` downloads ALL episodes before server starts — real podcast feeds unusable for E2E (too slow/large)
+  - `validators` was runtime dependency only in dev requirements — container crashed on startup
+  - Use `--add-host host.docker.internal:host-gateway` for Docker containers to reach test host
+  - Minimal MP3: ID3v2 header + one silent MPEG frame (423 bytes) is enough for download/storage tests
 ---
