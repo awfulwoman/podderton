@@ -50,14 +50,12 @@ def get_entries(feed_url):
 def get_feed_image_url(meta):
     """Fetch the image from the given feed URL."""
 
-    # Determine what represents the feed image
-
-    if validators.url(meta.image):
-        return validators.url
-
-    if validators.url(meta.image.href):
+    if not hasattr(meta, 'image'):
+        return None
+    if isinstance(meta.image, str) and validators.url(meta.image):
+        return meta.image
+    if hasattr(meta.image, 'href') and validators.url(meta.image.href):
         return meta.image.href
-    
     return None
 
 

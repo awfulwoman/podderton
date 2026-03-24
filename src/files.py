@@ -19,10 +19,8 @@ def write_dir(directory):
     """Create a directory if it doesn't exist."""
     if os.path.exists(directory):
         return True
-    else:
-        if os.makedirs(directory):
-            return True
-    return None
+    os.makedirs(directory, exist_ok=True)
+    return True
     
 
     

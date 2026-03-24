@@ -22,10 +22,6 @@ def define_string_tokens(entry):
         "description": description,
         "episode": episode,
         "season": season,
-        "title": title,
-        "description": description,
-        "episode": episode,
-        "season": season,
     }
 
 def replace_string_tokens(string, tokens):
