@@ -4,6 +4,8 @@
 - src/ modules import each other directly (no package prefix) — add `sys.path.insert(0, "src/")` in test files
 - conftest.py fixtures: `tmp_config` returns str path; `tmp_podcast_dir` returns pathlib.Path
 - sample_feed.xml has 3 episodes; episode 2 title contains `/`, `:`, `?` for sanitization testing
+- `{yyyy-mm-dd}` as a single token is NOT replaced by utils.py; real date pattern is `{yyyy}-{mmmm}-{dddd}` (returns unpadded ints: `2024-6-15`)
+- `define_string_tokens` date fields return raw integers (tm_year, tm_mon, tm_mday) — no zero-padding
 
 # Ralph Progress Log
 Milestone: test-core-functionality
@@ -21,4 +23,13 @@ Started: Tue 24 Mar 2026 14:44:50 CET
   - `validators` module used in subscribe.py but missing from requirements.txt — always install from both requirements.txt and requirements-dev.txt when setting up
   - conftest.py fixtures use tmp_path (pytest built-in) for temp dirs; config fixture writes YAML via PyYAML
   - sample_feed.xml episode 2 title has `/`, `:`, `?` chars — useful for sanitization tests
+---
+
+## [2026-03-24] - #13 Test file format: token replacement in utils.py
+- Created `tests/test_file_format.py` with 7 tests for `utils.define_string_tokens` and `utils.replace_string_tokens`
+- Tests cover: date extraction, content extraction, missing fields, basic replacement, null→empty, no placeholders, real-world patterns
+- **Learnings for future iterations:**
+  - `{yyyy-mm-dd}` as a single token is NOT replaced — no such key exists; use separate `{yyyy}-{mmmm}-{dddd}`
+  - Date values are raw Python ints (no zero-padding): June = 6, not "06"
+  - `define_string_tokens` uses dict `.get()` so plain dicts work fine as mock entries
 ---
