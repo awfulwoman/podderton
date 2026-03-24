@@ -3,6 +3,7 @@ import publish
 import server
 
 def main(args):
+    print("WARNING: Running in single-process mode. Use run_subscriber.py and run_generator.py for production.")
     print("Welcome to Podderton!")
     print("Using configuration from:", args[0])
 
