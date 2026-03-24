@@ -136,3 +136,47 @@ def main(config_file):
                 print(f"Downloaded: {entry.title}")
             except Exception as e:
                 print(f"Failed to download {entry.title}: {e}")
+                continue
+
+            # Save episode metadata JSON
+            stem = os.path.splitext(filepath)[0]
+            json_path = stem + '.json'
+            if not os.path.exists(json_path):
+                episode_image_url = None
+                if hasattr(entry, 'image') and hasattr(entry.image, 'href'):
+                    episode_image_url = entry.image.href
+                if not episode_image_url:
+                    for link in getattr(entry, 'links', []):
+                        if link.get('type', '').startswith('image/'):
+                            episode_image_url = link.get('href')
+                            break
+                metadata = {
+                    'title': getattr(entry, 'title', None),
+                    'summary': getattr(entry, 'summary', getattr(entry, 'description', None)),
+                    'published': getattr(entry, 'published', None),
+                    'duration': getattr(entry, 'itunes_duration', None),
+                    'episode': getattr(entry, 'itunes_episode', None),
+                    'season': getattr(entry, 'itunes_season', None),
+                    'audio_url': audio_url,
+                    'image_url': episode_image_url,
+                }
+                files.write_json(metadata, json_path)
+                print(f"Metadata saved: {entry.title}")
+
+            # Save episode artwork
+            art_path = stem + '.jpg'
+            if not os.path.exists(art_path):
+                episode_image_url = None
+                if hasattr(entry, 'image') and hasattr(entry.image, 'href'):
+                    episode_image_url = entry.image.href
+                if not episode_image_url:
+                    for link in getattr(entry, 'links', []):
+                        if link.get('type', '').startswith('image/'):
+                            episode_image_url = link.get('href')
+                            break
+                if episode_image_url:
+                    try:
+                        files.write_image(remote.get_file(episode_image_url), art_path)
+                        print(f"Artwork saved: {entry.title}")
+                    except Exception as e:
+                        print(f"Failed to download artwork for {entry.title}: {e}")
