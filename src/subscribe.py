@@ -64,6 +64,7 @@ def main(config_file):
     cfg = config.file(config_file)
     configured_feeds = subscriptions(cfg)
     subs_path = config.subscriptions_path(cfg)
+    any_downloaded = False
 
     if files.write_dir(subs_path):
         print("Subscriptions directory prepared.")
@@ -137,6 +138,7 @@ def main(config_file):
                 audio_data = remote.get_file(audio_url)
                 files.write_image(audio_data, filepath)
                 print(f"Downloaded: {entry.title}")
+                any_downloaded = True
             except Exception as e:
                 print(f"Failed to download {entry.title}: {e}")
                 continue
@@ -183,3 +185,5 @@ def main(config_file):
                         print(f"Artwork saved: {entry.title}")
                     except Exception as e:
                         print(f"Failed to download artwork for {entry.title}: {e}")
+
+    return any_downloaded
