@@ -33,3 +33,13 @@ Started: Tue 24 Mar 2026 14:22:29 CET
   - Extension extraction: split on `?` first to strip query params, then get last `.`-separated part
   - `{title}` token can contain slashes on some feeds — always sanitize filenames
 ---
+## [2026-03-24] - #4 Save per-episode metadata and artwork
+- Added episode metadata JSON saving after each audio download
+- Added episode artwork downloading (entry.image.href or entry.links with image/ type)
+- Skips if JSON/artwork already exists
+- Files changed: `src/subscribe.py`
+- **Learnings for future iterations:**
+  - `json.dump()` returns None — `files.write_json()` always returns None, use `os.path.exists()` to check before writing
+  - Episode image: check `entry.image.href` first, then scan `entry.links` for type starting with `image/`
+  - Use `os.path.splitext(filepath)[0]` to get stem for sibling files
+---
