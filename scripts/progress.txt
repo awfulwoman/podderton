@@ -10,6 +10,8 @@
 - `simplify_metadata()` requires `feed.summary` — sample_feed.xml must have `<itunes:summary>` or tests will fail
 - For mocking objects with `'key' in obj` checks (feedparser FeedParserDict interface), use a dict subclass with `__getattr__`, not `types.SimpleNamespace`
 - `responses.add()` allows unlimited calls to same URL by default — no need to re-add for multiple calls in one test
+- `.venv/bin/python` links to python3.13 but packages are installed under python3.12 — use `.venv/bin/python3.12` or `.venv/bin/pytest` for manual testing
+- `utils.define_string_tokens` uses `entry.get("episode", None)` but feedparser stores `<itunes:episode>` as `itunes_episode` — episode token is always empty for real feedparser entries
 
 # Ralph Progress Log
 Milestone: test-core-functionality
@@ -48,4 +50,14 @@ Started: Tue 24 Mar 2026 14:44:50 CET
   - `{yyyy-mm-dd}` as a single token is NOT replaced — no such key exists; use separate `{yyyy}-{mmmm}-{dddd}`
   - Date values are raw Python ints (no zero-padding): June = 6, not "06"
   - `define_string_tokens` uses dict `.get()` so plain dicts work fine as mock entries
+---
+
+## [2026-03-24] - #14 Test file format: full subscribe flow with custom file_format config
+- Created `tests/test_file_format_integration.py` with 5 integration tests
+- Tests cover: default title format, date format, episode+title format, unsafe char sanitization, extension replacement
+- All tests verify actual filenames on disk after full `subscribe.main()` run
+- **Learnings for future iterations:**
+  - `utils.define_string_tokens` uses `entry.get("episode")` but feedparser stores itunes:episode as `itunes_episode` — episode token always empty for feedparser entries
+  - When writing integration tests that use custom configs, create a `make_config()` helper rather than relying on the conftest `tmp_config` fixture (which has no file_format)
+  - The `.venv/bin/python` symlink points to python3.13 but packages live under python3.12 — always use `.venv/bin/python3.12` or `.venv/bin/pytest` for manual scripts
 ---
