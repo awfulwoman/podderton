@@ -27,3 +27,11 @@ def basepath(configuration):
 
     base_path = os.path.expanduser(path)
     return base_path
+
+def subscriptions_path(configuration):
+    """Get the path for subscribed feed data."""
+    return os.path.join(basepath(configuration), "subscriptions")
+
+def feeds_path(configuration):
+    """Get the path for generated feed XML files."""
+    return os.path.join(basepath(configuration), "feeds")

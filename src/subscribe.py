@@ -63,26 +63,27 @@ def get_feed_image_url(meta):
 def main(config_file):
     cfg = config.file(config_file)
     configured_feeds = subscriptions(cfg)
-    
-    if files.write_dir(config.basepath(cfg)):
-        print("Base directory prepared.")
-        
-    
+    subs_path = config.subscriptions_path(cfg)
+
+    if files.write_dir(subs_path):
+        print("Subscriptions directory prepared.")
+
+
     for configured_feed in configured_feeds:
         feed_meta = get_meta(configured_feed.get("url"))
-        feed_dir = os.path.join(config.basepath(cfg), configured_feed.get("id"))
-        
+        feed_dir = os.path.join(subs_path, configured_feed.get("id"))
+
         if files.write_dir(feed_dir):
             print(f"Directory for {configured_feed.get('name')} prepared.")
 
-        if files.write_json(feed_meta, os.path.join(config.basepath(cfg), configured_feed.get("id"), "original.json")):
+        if files.write_json(feed_meta, os.path.join(feed_dir, "original.json")):
             print(f"Original metadata for {configured_feed.get('name')} written.")
-        
-        simplified_meta = simplify_metadata(feed_meta, configured_feed)
-        if files.write_json(simplified_meta, os.path.join(config.basepath(cfg), configured_feed.get("id"), "feed.json")):
-            print(f"Simplified metadata for {configured_feed.get('name')} written.")            
 
-        feed_image_path = os.path.join(config.basepath(cfg), configured_feed.get("id"), "feed.jpg")
+        simplified_meta = simplify_metadata(feed_meta, configured_feed)
+        if files.write_json(simplified_meta, os.path.join(feed_dir, "feed.json")):
+            print(f"Simplified metadata for {configured_feed.get('name')} written.")
+
+        feed_image_path = os.path.join(feed_dir, "feed.jpg")
         if not os.path.exists(feed_image_path):
             feed_image_url = get_feed_image_url(feed_meta)
             if feed_image_url:

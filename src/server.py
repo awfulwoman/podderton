@@ -25,27 +25,30 @@ def get_mime(path):
 
 
 def listing_html(base_path, cfg):
-    feeds_dir = os.path.join(base_path, 'feeds')
+    subs_path = config.subscriptions_path(cfg)
     generate_cfg = cfg.get('generate', {}) or {}
     custom_feeds = generate_cfg.get('feeds', []) or []
 
     rows = []
-    for feed_id in sorted(os.listdir(base_path)):
-        feed_dir = os.path.join(base_path, feed_id)
-        if not os.path.isdir(feed_dir) or feed_id == 'feeds':
-            continue
-        feed_json_path = os.path.join(feed_dir, 'feed.json')
-        if not os.path.exists(feed_json_path):
-            continue
-        with open(feed_json_path) as f:
-            meta = json.load(f)
-        title = meta.get('title') or feed_id
-        episodes_dir = os.path.join(feed_dir, 'episodes')
-        episode_count = sum(
-            1 for fn in os.listdir(episodes_dir)
-            if fn.endswith('.json')
-        ) if os.path.isdir(episodes_dir) else 0
-        artwork = f'/{feed_id}/feed.jpg' if os.path.exists(os.path.join(feed_dir, 'feed.jpg')) else ''
+    if not os.path.isdir(subs_path):
+        pass
+    else:
+        for feed_id in sorted(os.listdir(subs_path)):
+            feed_dir = os.path.join(subs_path, feed_id)
+            if not os.path.isdir(feed_dir):
+                continue
+            feed_json_path = os.path.join(feed_dir, 'feed.json')
+            if not os.path.exists(feed_json_path):
+                continue
+            with open(feed_json_path) as f:
+                meta = json.load(f)
+            title = meta.get('title') or feed_id
+            episodes_dir = os.path.join(feed_dir, 'episodes')
+            episode_count = sum(
+                1 for fn in os.listdir(episodes_dir)
+                if fn.endswith('.json')
+            ) if os.path.isdir(episodes_dir) else 0
+            artwork = f'/subscriptions/{feed_id}/feed.jpg' if os.path.exists(os.path.join(feed_dir, 'feed.jpg')) else ''
         xml_url = f'/feeds/{feed_id}.xml'
         img_tag = f'<img src="{artwork}" width="64" height="64" style="vertical-align:middle">' if artwork else ''
         rows.append(

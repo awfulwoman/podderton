@@ -74,7 +74,7 @@ def gather_feed_items(feed_dir, feed_id):
             if os.path.exists(candidate):
                 audio_file = stem + ext
                 break
-        enclosure_url = f'/{feed_id}/episodes/{audio_file}' if audio_file else ''
+        enclosure_url = f'/subscriptions/{feed_id}/episodes/{audio_file}' if audio_file else ''
         enclosure_length = os.path.getsize(os.path.join(episodes_dir, audio_file)) if audio_file else 0
         items.append({
             'title': ep.get('title'),
@@ -89,14 +89,13 @@ def gather_feed_items(feed_dir, feed_id):
     return items
 
 
-def generate_separate(base_path):
-    """Generate one XML feed per feed directory under base_path."""
-    feeds_dir = os.path.join(base_path, 'feeds')
+def generate_separate(base_path, subs_path, feeds_dir):
+    """Generate one XML feed per feed directory under subs_path."""
     files.write_dir(feeds_dir)
 
-    for feed_id in os.listdir(base_path):
-        feed_dir = os.path.join(base_path, feed_id)
-        if not os.path.isdir(feed_dir) or feed_id == 'feeds':
+    for feed_id in os.listdir(subs_path):
+        feed_dir = os.path.join(subs_path, feed_id)
+        if not os.path.isdir(feed_dir):
             continue
         feed_json_path = os.path.join(feed_dir, 'feed.json')
         if not os.path.exists(feed_json_path):
@@ -104,7 +103,7 @@ def generate_separate(base_path):
         with open(feed_json_path) as f:
             feed_meta = json.load(f)
 
-        image_url = f'/{feed_id}/feed.jpg' if os.path.exists(os.path.join(feed_dir, 'feed.jpg')) else None
+        image_url = f'/subscriptions/{feed_id}/feed.jpg' if os.path.exists(os.path.join(feed_dir, 'feed.jpg')) else None
         items = gather_feed_items(feed_dir, feed_id)
         tree = make_rss_feed(
             title=feed_meta.get('title', ''),
@@ -118,35 +117,34 @@ def generate_separate(base_path):
         print(f"Generated feed: {out_path}")
 
 
-def get_all_feed_ids(base_path):
-    """Return list of feed IDs (subdirs with feed.json) under base_path."""
+def get_all_feed_ids(subs_path):
+    """Return list of feed IDs (subdirs with feed.json) under subs_path."""
     ids = []
-    for feed_id in os.listdir(base_path):
-        feed_dir = os.path.join(base_path, feed_id)
-        if os.path.isdir(feed_dir) and feed_id != 'feeds':
+    for feed_id in os.listdir(subs_path):
+        feed_dir = os.path.join(subs_path, feed_id)
+        if os.path.isdir(feed_dir):
             if os.path.exists(os.path.join(feed_dir, 'feed.json')):
                 ids.append(feed_id)
     return ids
 
 
-def gather_items_for_feeds(base_path, feed_ids):
+def gather_items_for_feeds(subs_path, feed_ids):
     """Gather and return all episodes from the given feed IDs, sorted newest first."""
     all_items = []
     for feed_id in feed_ids:
-        feed_dir = os.path.join(base_path, feed_id)
+        feed_dir = os.path.join(subs_path, feed_id)
         if os.path.isdir(feed_dir):
             all_items.extend(gather_feed_items(feed_dir, feed_id))
     all_items.sort(key=lambda x: x['_ts'], reverse=True)
     return all_items
 
 
-def generate_combined(base_path):
+def generate_combined(base_path, subs_path, feeds_dir):
     """Generate a single feeds/feeds.xml with all episodes from all feeds."""
-    feeds_dir = os.path.join(base_path, 'feeds')
     files.write_dir(feeds_dir)
 
-    feed_ids = get_all_feed_ids(base_path)
-    all_items = gather_items_for_feeds(base_path, feed_ids)
+    feed_ids = get_all_feed_ids(subs_path)
+    all_items = gather_items_for_feeds(subs_path, feed_ids)
     tree = make_rss_feed(
         title='Podderton Combined Feed',
         description='All subscribed podcasts',
@@ -159,13 +157,12 @@ def generate_combined(base_path):
     print(f"Generated feed: {out_path}")
 
 
-def generate_default_all(base_path):
+def generate_default_all(base_path, subs_path, feeds_dir):
     """Generate feeds/feeds.xml as the default all-episodes feed."""
-    feeds_dir = os.path.join(base_path, 'feeds')
     files.write_dir(feeds_dir)
 
-    feed_ids = get_all_feed_ids(base_path)
-    all_items = gather_items_for_feeds(base_path, feed_ids)
+    feed_ids = get_all_feed_ids(subs_path)
+    all_items = gather_items_for_feeds(subs_path, feed_ids)
     tree = make_rss_feed(
         title='Podderton Combined Feed',
         description='All subscribed podcasts',
@@ -178,18 +175,17 @@ def generate_default_all(base_path):
     print(f"Generated feed: {out_path}")
 
 
-def generate_custom_feeds(base_path, custom_feeds):
+def generate_custom_feeds(base_path, subs_path, feeds_dir, custom_feeds):
     """Generate custom named feeds from config generate.feeds list."""
     if not custom_feeds:
         return
-    feeds_dir = os.path.join(base_path, 'feeds')
     files.write_dir(feeds_dir)
 
     for feed_cfg in custom_feeds:
         name = feed_cfg.get('name', 'Custom Feed')
         feed_id = feed_cfg.get('id', 'custom')
         input_ids = feed_cfg.get('feeds', [])
-        items = gather_items_for_feeds(base_path, input_ids)
+        items = gather_items_for_feeds(subs_path, input_ids)
         tree = make_rss_feed(
             title=name,
             description='',
@@ -205,6 +201,8 @@ def generate_custom_feeds(base_path, custom_feeds):
 def main(config_file):
     cfg = config.file(config_file)
     base_path = config.basepath(cfg)
+    subs_path = config.subscriptions_path(cfg)
+    feeds_dir = config.feeds_path(cfg)
     generate_cfg = cfg.get('generate', {}) or {}
     generate_type = generate_cfg.get('type', 'separate')
     custom_feeds = generate_cfg.get('feeds', [])
@@ -213,10 +211,10 @@ def main(config_file):
 
     if not type_disabled:
         if generate_type == 'combined':
-            generate_combined(base_path)
+            generate_combined(base_path, subs_path, feeds_dir)
         else:
             # separate (default) — one XML per feed + default feeds.xml
-            generate_separate(base_path)
-            generate_default_all(base_path)
+            generate_separate(base_path, subs_path, feeds_dir)
+            generate_default_all(base_path, subs_path, feeds_dir)
 
-    generate_custom_feeds(base_path, custom_feeds)
+    generate_custom_feeds(base_path, subs_path, feeds_dir, custom_feeds)
