@@ -1,0 +1,35 @@
+# Ralph Progress Log
+Milestone: basic-functionality
+Started: Tue 24 Mar 2026 14:22:29 CET
+---
+
+## Codebase Patterns
+- feedparser enclosures: check `entry.links` for `rel="enclosure"` first, fallback to `entry.enclosures[0]`
+- `utils.define_string_tokens()` uses `entry.get()` dict-style — feedparser entries support this
+- Filename sanitization: replace `/ \ : * ? " < > |` with `_` before writing to disk
+- `files.write_image()` works for any binary data, not just images
+---
+
+## [2026-03-24] - #1 Fix bugs in existing code
+- Fixed duplicate dict keys in `utils.py` `define_string_tokens()`
+- Fixed `files.py` `write_dir()` — `os.makedirs()` returns None, not truthy
+- Fixed `subscribe.py` `get_feed_image_url()` — returned function ref instead of URL string; added `hasattr` guards for safety
+- Files changed: `src/utils.py`, `src/files.py`, `src/subscribe.py`
+- **Learnings for future iterations:**
+  - Use `python3` not `python` on this system
+  - `feedparser` `meta.image` can be either a string or an object with `.href` — always check with `isinstance` and `hasattr`
+  - `os.makedirs()` always returns None — never use it in a conditional
+---
+
+## [2026-03-24] - #3 Download podcast episode audio files
+- Implemented episode download loop in `subscribe.py`
+- Fixed `utils.replace_string_tokens()` to use `{key}` pattern and handle None values
+- Enclosure detection: checks `entry.links` (rel=enclosure) then `entry.enclosures`
+- Extension derived from URL filename or content-type header mapping
+- Filename sanitized for filesystem safety
+- Files changed: `src/subscribe.py`, `src/utils.py`
+- **Learnings for future iterations:**
+  - `utils.define_string_tokens()` uses `entry.get()` — works because feedparser entries support dict-style access
+  - Extension extraction: split on `?` first to strip query params, then get last `.`-separated part
+  - `{title}` token can contain slashes on some feeds — always sanitize filenames
+---
