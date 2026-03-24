@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>The Mock Podcast</title>
+    <description>A fake podcast for local development and testing.</description>
+    <itunes:summary>A fake podcast for local development and testing.</itunes:summary>
+    <link>http://mock:8080</link>
+    <image>
+      <url>http://mock:8080/art/cover.jpg</url>
+      <title>The Mock Podcast</title>
+      <link>http://mock:8080</link>
+    </image>
+    <itunes:image href="http://mock:8080/art/cover.jpg"/>
+    <item>
+      <title>Episode 1: Hello World</title>
+      <description>The very first episode of our mock podcast.</description>
+      <pubDate>Mon, 01 Jan 2024 10:00:00 +0000</pubDate>
+      <enclosure url="http://mock:8080/audio/episode1.mp3" length="4096" type="audio/mpeg"/>
+      <itunes:episode>1</itunes:episode>
+      <itunes:season>1</itunes:season>
+      <itunes:duration>00:01:00</itunes:duration>
+    </item>
+    <item>
+      <title>Episode 2: The Tricky/Title: With "Special" Chars?</title>
+      <description>Testing filename sanitisation with unusual characters.</description>
+      <pubDate>Mon, 08 Jan 2024 10:00:00 +0000</pubDate>
+      <enclosure url="http://mock:8080/audio/episode2.mp3" length="4096" type="audio/mpeg"/>
+      <itunes:episode>2</itunes:episode>
+      <itunes:season>1</itunes:season>
+      <itunes:duration>00:01:00</itunes:duration>
+    </item>
+    <item>
+      <title>Episode 3: Season Finale</title>
+      <description>The thrilling conclusion to season one.</description>
+      <pubDate>Mon, 15 Jan 2024 10:00:00 +0000</pubDate>
+      <enclosure url="http://mock:8080/audio/episode3.mp3" length="4096" type="audio/mpeg"/>
+      <itunes:episode>3</itunes:episode>
+      <itunes:season>1</itunes:season>
+      <itunes:duration>00:01:00</itunes:duration>
+    </item>
+  </channel>
+</rss>

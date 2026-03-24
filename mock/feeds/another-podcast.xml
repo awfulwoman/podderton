@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Another Mock Show</title>
+    <description>A second fake podcast for testing custom feed generation.</description>
+    <itunes:summary>A second fake podcast for testing custom feed generation.</itunes:summary>
+    <link>http://mock:8080</link>
+    <image>
+      <url>http://mock:8080/art/cover2.jpg</url>
+      <title>Another Mock Show</title>
+      <link>http://mock:8080</link>
+    </image>
+    <itunes:image href="http://mock:8080/art/cover2.jpg"/>
+    <item>
+      <title>Pilot</title>
+      <description>The pilot episode.</description>
+      <pubDate>Wed, 01 May 2024 09:00:00 +0000</pubDate>
+      <enclosure url="http://mock:8080/audio/another-ep1.m4a" length="4096" type="audio/mp4"/>
+      <itunes:episode>1</itunes:episode>
+      <itunes:season>1</itunes:season>
+      <itunes:duration>00:02:00</itunes:duration>
+    </item>
+    <item>
+      <title>Episode 2</title>
+      <description>The second episode with a different audio format.</description>
+      <pubDate>Wed, 08 May 2024 09:00:00 +0000</pubDate>
+      <enclosure url="http://mock:8080/audio/another-ep2.m4a" length="4096" type="audio/mp4"/>
+      <itunes:episode>2</itunes:episode>
+      <itunes:season>1</itunes:season>
+      <itunes:duration>00:02:00</itunes:duration>
+    </item>
+  </channel>
+</rss>

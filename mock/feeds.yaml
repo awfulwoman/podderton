@@ -1,0 +1,18 @@
+path: /podcasts
+subscribe:
+  feeds:
+    - name: The Mock Podcast
+      id: mockpod
+      url: http://mock:8080/feeds/test-podcast.xml
+    - name: Another Mock Show
+      id: anothermock
+      url: http://mock:8080/feeds/another-podcast.xml
+      file_format: "{yyyy}-{mmmm}-{dddd} {title}.ext"
+generate:
+  type: separate
+  feeds:
+    - name: All Mocks
+      id: allmocks
+      feeds:
+        - mockpod
+        - anothermock

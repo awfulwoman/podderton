@@ -1,4 +1,13 @@
 services:
+  mock:
+    image: python:3.12-slim
+    working_dir: /mock
+    command: python server.py
+    volumes:
+      - ./mock:/mock
+    expose:
+      - "8080"
+
   podderton:
     build: .
     ports:
@@ -7,3 +16,5 @@ services:
       - ./config:/config
       - ./podcasts:/podcasts
       - ./src:/app/src
+    depends_on:
+      - mock
