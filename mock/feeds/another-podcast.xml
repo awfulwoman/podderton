@@ -20,6 +20,7 @@
       <itunes:episode>1</itunes:episode>
       <itunes:season>1</itunes:season>
       <itunes:duration>00:02:00</itunes:duration>
+      <itunes:image href="http://mock:8080/art/another-ep1.jpg"/>
     </item>
     <item>
       <title>Episode 2</title>
@@ -29,6 +30,7 @@
       <itunes:episode>2</itunes:episode>
       <itunes:season>1</itunes:season>
       <itunes:duration>00:02:00</itunes:duration>
+      <itunes:image href="http://mock:8080/art/another-ep2.jpg"/>
     </item>
   </channel>
 </rss>
