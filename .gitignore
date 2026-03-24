@@ -174,3 +174,4 @@ cython_debug/
 .DS_Store
 podcasts/subscriptions/
 podcasts/feeds/
+config/
