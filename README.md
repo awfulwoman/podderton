@@ -26,23 +26,23 @@ A file called `feeds.yaml` is found in `<yourpath>/config/` i.e `<yourpath>/conf
 At a minimum the file should contain something like this:
 
 ```yaml
-input:
+subscribe:
   feeds:
     - name: Three Bean Salad
       id: threebeansalad
       url: https://podcast.global.com/show/5234547/episodes/feed
 ```
 
-Once the container is restarted Podderton will query any feeds that it finds, download them, and make a feed available (<http://127.0.0.1:9988/feeds.xml>) for you subscribe to via your podcast player of choice. Neat! 
+Once the container is restarted Podderton will query any feeds that it finds, download them, and make a feed available (<http://127.0.0.1:9988/feeds.xml>) for you subscribe to via your podcast player of choice. Neat!
 
 If you look in your podcast directory you'll see a directory called `threebeansalad` with audio files gradually getting downloaded.
 
 ### Filename formatting
 
-Need to have a custom file format for saving files? 
+Need to have a custom file format for saving files?
 
 ```yaml
-input:
+subscribe:
   feeds:
     - name: Three Bean Salad
       id: threebeansalad
@@ -57,10 +57,10 @@ Want to alter the file format? Eeek, sorry, but Podderton isn't yet smart enough
 Want to create custom feeds?
 
 ```yaml
-input: 
+subscribe:
   feeds:
     - name: Three Bean Salad
-      id: threebeansalad 
+      id: threebeansalad
       url: https://podcast.global.com/show/5234547/episodes/feed
     - name: Beef and Dairy Network
       id: beef
@@ -68,7 +68,7 @@ input:
     - name: THe Rest is Politics
       id: restispolitics
       url: https://feeds.megaphone.fm/GLT9190936013
-output:
+generate:
   feeds:
     - name: Funny Stuff
       id: funnystuff
@@ -88,18 +88,18 @@ This custom feed will be available at <http://127.0.0.1:9988/funnystuff.xml>. Do
 Want to change how often Podderton checks feeds? Add a cron-based schedule!
 
 ```yaml
-input:
+subscribe:
   schedule: "0 * * * *" # Quotes necessary here
 ```
 
 You can also add a schedule for an individual feed.
 
 ```yaml
-input:
+subscribe:
   schedule: "0 * * * *"
   feeds:
     - name: Three Bean Salad
-      id: threebeansalad 
+      id: threebeansalad
       schedule: "0 30 * * *" # This will override the globale schedule
       url: https://podcast.global.com/show/5234547/episodes/feed
 ```
@@ -107,7 +107,7 @@ input:
 ### Output feed refresh
 
 ```yaml
-output:
+generate:
   refresh: 5m # or 2h, 30s, or 1w if you're chill
 ```
 
@@ -116,35 +116,35 @@ output:
 Don't want the utility webpage to be generated?
 
 ```yaml
-webpage: 
+webpage:
   display: false
 ```
 
-Don't want any outputted feeds? 
+Don't want any outputted feeds?
 
 ```yaml
-output: 
+generate:
   feeds: false
 ```
 
 Want to disable the default output feed?
 
 ```yaml
-output: 
+generate:
   type: false
 ```
 
 Want to combine all the feeds into one output feed?
 
 ```yaml
-output: 
+generate:
   type: combined
 ```
 
 Want to have a separate output feed for each input feed?
 
 ```yaml
-output: 
+generate:
   type: separate # default
 ```
 

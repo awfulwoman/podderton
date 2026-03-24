@@ -22,14 +22,10 @@ def define_string_tokens(entry):
         "description": description,
         "episode": episode,
         "season": season,
-        "title": title,
-        "description": description,
-        "episode": episode,
-        "season": season,
     }
 
 def replace_string_tokens(string, tokens):
     """Replace string tokens with their corresponding values."""
     for key, value in tokens.items():
-        string = string.replace(f"{key}", value)
+        string = string.replace(f"{{{key}}}", str(value) if value is not None else "")
     return string
