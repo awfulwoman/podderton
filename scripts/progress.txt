@@ -91,3 +91,10 @@ Started: Tue 24 Mar 2026 14:22:29 CET
   - `os.makedirs(dirname, exist_ok=True)` needed before writing default config (parent dir may not exist)
   - Docker build verified with `docker build -t podderton .` — builds clean
 ---
+## [2026-03-24] - #2 Update README to match code conventions
+- Replaced all `input:` with `subscribe:` in YAML examples
+- Replaced all `output:` with `generate:` in YAML examples
+- Files changed: `README.md`
+- **Learnings for future iterations:**
+  - `path:` and `webpage:` top-level keys were already correct in README — only `input`/`output` needed updating
+---
