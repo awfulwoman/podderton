@@ -61,3 +61,14 @@ Started: Tue 24 Mar 2026 14:44:50 CET
   - When writing integration tests that use custom configs, create a `make_config()` helper rather than relying on the conftest `tmp_config` fixture (which has no file_format)
   - The `.venv/bin/python` symlink points to python3.13 but packages live under python3.12 — always use `.venv/bin/python3.12` or `.venv/bin/pytest` for manual scripts
 ---
+
+## [2026-03-24] - #11 Test bootstrap: config creation, directory setup, and server startup
+- Created `tests/test_bootstrap.py` with 4 tests (config creation, config loading, directory structure, server startup)
+- Tests cover: default config file creation, loading existing YAML, subscribe.main() directory structure, server.main() HTTP response
+- Used `responses.RequestsMock()` as context manager (not decorator) for server test to avoid intercepting the localhost health-check poll
+- **Learnings for future iterations:**
+  - When testing code that starts an HTTP server AND makes outbound HTTP calls in the same test, use `responses.RequestsMock()` as a context manager for just the setup phase, then exit it before starting the server — avoids mock intercepting localhost requests
+  - server.main() uses hardcoded PORT=9988 and a global `_config_file` — only one server test can run per process
+  - Daemon threads die when the test process ends — no explicit shutdown needed for the server test
+  - publish.main() must be called after subscribe.main() before the server will show feed HTML (server reads feeds/ XML and feed directories)
+---
