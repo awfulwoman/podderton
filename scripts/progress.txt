@@ -67,3 +67,16 @@ Started: Tue 24 Mar 2026 14:22:29 CET
   - `generate.feeds` is a list of dicts with `name`, `id`, `feeds` (list of input feed IDs)
   - `feeds.xml` is the default all-episodes feed referenced by README at `/feeds.xml`
 ---
+## [2026-03-24] - #7 HTTP server serving feeds, artwork, and listing page
+- Created `src/server.py`: stdlib `http.server` on port 9988
+- Routes: `/` (HTML listing), `/feeds.xml`, `/feeds/<id>.xml`, `/<feed_id>/<file>`
+- HTML listing reads `feed.json` for name/metadata, counts episode JSONs, links artwork and XML
+- `webpage.display: false` config key returns plain text instead of HTML
+- Module-level `_config_file` var passed to handler so config is re-read per request
+- Updated `__main__.py` to import server and call `server.main()` (blocking)
+- Files changed: `src/server.py` (new), `src/__main__.py`
+- **Learnings for future iterations:**
+  - Config is re-read on every request — no caching needed, picks up changes automatically
+  - `webpage.display` may come in as bool `False` or string `"false"` — check both
+  - Episode count: count `.json` files excluding `feed.json` and `original.json`
+---
