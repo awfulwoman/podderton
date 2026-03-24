@@ -1,0 +1,24 @@
+## Codebase Patterns
+- Run tests with `.venv/bin/pytest` (not `python -m pytest`) — system Python on macOS lacks pytest
+- Always install both requirements.txt AND requirements-dev.txt: `validators` is used in src but only in dev requirements
+- src/ modules import each other directly (no package prefix) — add `sys.path.insert(0, "src/")` in test files
+- conftest.py fixtures: `tmp_config` returns str path; `tmp_podcast_dir` returns pathlib.Path
+- sample_feed.xml has 3 episodes; episode 2 title contains `/`, `:`, `?` for sanitization testing
+
+# Ralph Progress Log
+Milestone: test-core-functionality
+Started: Tue 24 Mar 2026 14:44:50 CET
+---
+
+## [2026-03-24] - #10 Set up pytest infrastructure with fixtures and test feed data
+- Created requirements-dev.txt (pytest, pytest-mock, responses, validators)
+- Created tests/__init__.py, tests/conftest.py with 3 fixtures
+- Created tests/fixtures/sample_feed.xml (3-episode RSS 2.0 feed with itunes metadata)
+- Created tests/test_smoke.py (imports all 7 src modules)
+- Added pytest.ini with testpaths and e2e marker registration
+- **Learnings for future iterations:**
+  - Use `.venv/bin/pytest` not `python -m pytest` (venv issue on macOS with system python)
+  - `validators` module used in subscribe.py but missing from requirements.txt — always install from both requirements.txt and requirements-dev.txt when setting up
+  - conftest.py fixtures use tmp_path (pytest built-in) for temp dirs; config fixture writes YAML via PyYAML
+  - sample_feed.xml episode 2 title has `/`, `:`, `?` chars — useful for sanitization tests
+---
