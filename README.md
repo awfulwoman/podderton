@@ -148,6 +148,14 @@ generate:
   type: separate # default
 ```
 
+## Development
+
+For local development, use the dev compose file which mounts `src/` directly so code changes are reflected without rebuilding:
+
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+
 ## Internals
 
 Podderton relies on the YAML file for configuration, and directories for storing podcasts. The webpage and feeds are generated on the fly. There's no state or fanciness involved.

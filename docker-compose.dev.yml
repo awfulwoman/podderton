@@ -1,0 +1,9 @@
+services:
+  podderton:
+    build: .
+    ports:
+      - "9988:9988"
+    volumes:
+      - ./config:/config
+      - ./podcasts:/podcasts
+      - ./src:/app/src
