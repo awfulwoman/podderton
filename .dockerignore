@@ -1,6 +1,10 @@
 .git
+.gitignore
+.github
 .venv
 assets
+mock
+tests
+docker-compose*.yml
 __pycache__
 *.pyc
-.gitignore
