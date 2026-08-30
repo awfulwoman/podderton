@@ -9,7 +9,7 @@ There's no web interface - all configuration is done via YAML.
 ```yaml
 services:
   subscriber:
-    image: awfulwoman/podderton
+    image: ghcr.io/awfulwoman/podderton
     command: ["python", "run_subscriber.py", "/config/feeds.yaml"]
     volumes:
       - "<yourpath>/config:/config:ro"
@@ -18,7 +18,7 @@ services:
       - PODDERTON_PATH=/
 
   generator:
-    image: awfulwoman/podderton
+    image: ghcr.io/awfulwoman/podderton
     command: ["python", "run_generator.py", "/config/feeds.yaml"]
     ports:
       - "9988:9988" # Change the first "9988" to whatever port you need
