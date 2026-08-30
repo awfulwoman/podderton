@@ -92,12 +92,12 @@ class TestDirectoryStructure:
         subscribe.main(str(config_path))
 
         assert podcast_dir.is_dir()
-        feed_dir = podcast_dir / "testfeed"
+        feed_dir = podcast_dir / "subscriptions" / "testfeed"
         assert feed_dir.is_dir()
-        assert (feed_dir / "feed.json").exists()
-        assert (feed_dir / "original.json").exists()
+        assert (feed_dir / "meta.json").exists()
+        assert (feed_dir / "source.json").exists()
 
-        with open(feed_dir / "feed.json") as f:
+        with open(feed_dir / "meta.json") as f:
             meta = json.load(f)
         assert "title" in meta
         assert "summary" in meta

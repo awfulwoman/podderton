@@ -89,15 +89,16 @@ class TestFullDownloadFlow:
         _register_all_mocks(sample_feed_xml)
         subscribe.main(tmp_config)
 
-        feed_dir = tmp_podcast_dir / "testpod"
+        feed_dir = tmp_podcast_dir / "subscriptions" / "testpod"
         assert feed_dir.is_dir(), "Feed subdirectory was not created"
 
-        assert (feed_dir / "feed.json").exists(), "feed.json missing"
-        assert (feed_dir / "original.json").exists(), "original.json missing"
+        assert (feed_dir / "meta.json").exists(), "meta.json missing"
+        assert (feed_dir / "source.json").exists(), "source.json missing"
         assert (feed_dir / "feed.jpg").exists(), "feed.jpg missing"
 
-        mp3_files = list(feed_dir.glob("*.mp3"))
-        ep_json_files = [f for f in feed_dir.glob("*.json") if f.name not in ("feed.json", "original.json")]
+        episodes_dir = feed_dir / "episodes"
+        mp3_files = list(episodes_dir.glob("*.mp3"))
+        ep_json_files = list(episodes_dir.glob("*.json"))
 
         assert len(mp3_files) == 3, f"Expected 3 mp3 files, got {len(mp3_files)}: {mp3_files}"
         assert len(ep_json_files) == 3, f"Expected 3 episode json files, got {len(ep_json_files)}: {ep_json_files}"
@@ -107,8 +108,8 @@ class TestFullDownloadFlow:
         _register_all_mocks(sample_feed_xml)
         subscribe.main(tmp_config)
 
-        feed_dir = tmp_podcast_dir / "testpod"
-        with open(feed_dir / "feed.json") as f:
+        feed_dir = tmp_podcast_dir / "subscriptions" / "testpod"
+        with open(feed_dir / "meta.json") as f:
             meta = json.load(f)
 
         assert meta["title"] == "Test Podcast"
@@ -120,8 +121,8 @@ class TestFullDownloadFlow:
         _register_all_mocks(sample_feed_xml)
         subscribe.main(tmp_config)
 
-        feed_dir = tmp_podcast_dir / "testpod"
-        ep_json_files = [f for f in feed_dir.glob("*.json") if f.name not in ("feed.json", "original.json")]
+        feed_dir = tmp_podcast_dir / "subscriptions" / "testpod"
+        ep_json_files = list((feed_dir / "episodes").glob("*.json"))
         assert ep_json_files
 
         with open(ep_json_files[0]) as f:

@@ -55,8 +55,8 @@ class TestDefaultFormat:
         register_mocks(sample_feed_xml)
         subscribe.main(config_path)
 
-        feed_dir = podcast_dir / "testpod"
-        mp3_files = {f.name for f in feed_dir.glob("*.mp3")}
+        episodes_dir = podcast_dir / "subscriptions" / "testpod" / "episodes"
+        mp3_files = {f.name for f in episodes_dir.glob("*.mp3")}
 
         # Titles from sample_feed.xml (unsafe chars replaced with _)
         assert "Episode One_ Getting Started.mp3" in mp3_files or \
@@ -76,8 +76,8 @@ class TestDateFormat:
         register_mocks(sample_feed_xml)
         subscribe.main(config_path)
 
-        feed_dir = podcast_dir / "testpod"
-        mp3_files = {f.name for f in feed_dir.glob("*.mp3")}
+        episodes_dir = podcast_dir / "subscriptions" / "testpod" / "episodes"
+        mp3_files = {f.name for f in episodes_dir.glob("*.mp3")}
 
         # sample_feed.xml episodes: Jun 15, Jun 22, Jun 29 2024
         # Raw ints, no zero-padding
@@ -97,8 +97,8 @@ class TestEpisodeNumberFormat:
         register_mocks(sample_feed_xml)
         subscribe.main(config_path)
 
-        feed_dir = podcast_dir / "testpod"
-        mp3_files = {f.name for f in feed_dir.glob("*.mp3")}
+        episodes_dir = podcast_dir / "subscriptions" / "testpod" / "episodes"
+        mp3_files = {f.name for f in episodes_dir.glob("*.mp3")}
 
         # Format was applied: filenames contain " - " separator from {episode} - {title}
         # (episode token is empty for feedparser entries since itunes_episode != episode key)
@@ -117,8 +117,8 @@ class TestUnsafeCharSanitization:
         register_mocks(sample_feed_xml)
         subscribe.main(config_path)
 
-        feed_dir = podcast_dir / "testpod"
-        mp3_files = {f.name for f in feed_dir.glob("*.mp3")}
+        episodes_dir = podcast_dir / "subscriptions" / "testpod" / "episodes"
+        mp3_files = {f.name for f in episodes_dir.glob("*.mp3")}
 
         # Episode 2 title: "Episode Two: The/Deep:Dive?" — all of / : ? should be _
         unsafe_chars = ['/', ':', '?']
@@ -164,7 +164,7 @@ class TestExtensionReplacement:
         responses_lib.add(responses_lib.GET, M4A_EP_URL, body=DUMMY_BYTES, status=200)
         subscribe.main(config_path)
 
-        feed_dir = podcast_dir / "testpod"
-        m4a_files = list(feed_dir.glob("*.m4a"))
-        assert len(m4a_files) == 1, f"Expected 1 .m4a file, got: {list(feed_dir.iterdir())}"
+        episodes_dir = podcast_dir / "subscriptions" / "testpod" / "episodes"
+        m4a_files = list(episodes_dir.glob("*.m4a"))
+        assert len(m4a_files) == 1, f"Expected 1 .m4a file, got: {list(episodes_dir.iterdir())}"
         assert m4a_files[0].name == "Episode One.m4a"
