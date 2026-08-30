@@ -103,7 +103,10 @@ def test_full_container_lifecycle():
 
     container_id = None
     try:
-        with tempfile.TemporaryDirectory() as config_dir, tempfile.TemporaryDirectory() as podcasts_dir:
+        # The container runs as root and writes into the podcasts bind mount, so
+        # the resulting files are root-owned; ignore cleanup errors on teardown.
+        with tempfile.TemporaryDirectory() as config_dir, \
+                tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as podcasts_dir:
             config_path = Path(config_dir)
             podcasts_path = Path(podcasts_dir)
 
