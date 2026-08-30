@@ -124,6 +124,8 @@ def test_full_container_lifecycle():
                     "-v", f"{podcasts_path}:/podcasts",
                     "--add-host", f"host.docker.internal:host-gateway",
                     "podderton-test",
+                    # single-process mode: subscribe, then publish, then serve
+                    "python", "__main__.py", "/config/feeds.yaml",
                 ],
                 capture_output=True,
                 text=True,
@@ -146,7 +148,15 @@ def test_full_container_lifecycle():
                     pass
                 time.sleep(1)
 
-            assert server_up, "Server did not become available within 60 seconds"
+            if not server_up:
+                logs = subprocess.run(
+                    ["docker", "logs", container_id], capture_output=True, text=True
+                )
+                pytest.fail(
+                    "Server did not become available within 60 seconds.\n"
+                    f"--- container stdout ---\n{logs.stdout}\n"
+                    f"--- container stderr ---\n{logs.stderr}"
+                )
 
             # GET / returns 200 with HTML containing "testfeed"
             resp = requests.get(base_url + "/", timeout=10)
