@@ -49,23 +49,36 @@ def generate_interval(configuration):
 def file(file_path):
     """Read a YAML file and return its contents. Create default if missing."""
     if not os.path.exists(file_path):
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, "w") as f:
-            yaml.dump(DEFAULT_CONFIG, f, default_flow_style=False)
+        try:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            with open(file_path, "w") as f:
+                yaml.dump(DEFAULT_CONFIG, f, default_flow_style=False)
+        except OSError as e:
+            print(f"WARNING: could not write default config to {file_path}: {e}")
         return DEFAULT_CONFIG.copy()
 
     with open(file_path, "r") as f:
         return yaml.safe_load(f)
 
 def basepath(configuration):
-    """Get the base path from the configuration."""
+    """Get the base path. YAML 'path' > PODDERTON_PATH env > default."""
     path = configuration.get("path") if configuration else None
+
+    if not path:
+        path = os.environ.get("PODDERTON_PATH")
 
     if not path:
         path = "/podcasts"
 
     base_path = os.path.expanduser(path)
     return base_path
+
+def public_url(configuration):
+    """Optional public base URL for absolute feed links. None when unset."""
+    url = configuration.get("url") if configuration else None
+    if not url:
+        return None
+    return str(url).rstrip("/")
 
 def subscriptions_path(configuration):
     """Get the path for subscribed feed data."""

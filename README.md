@@ -34,7 +34,7 @@ volumes:
   feeds:
 ```
 
-Go to whever you've installed go to <http://127.0.0.1:9988> (or whatever URL you're using) and you should see a simple page listing the feeds. If a config file doesn't exist a default one will be created.
+Go to whever you've installed go to <http://127.0.0.1:9988> (or whatever URL you're using) and you should see a simple page listing the feeds. If a writable config file doesn't exist a default one will be created (on a read-only `/config` mount Podderton falls back to built-in defaults and logs a warning).
 
 ## Usage
 
@@ -52,7 +52,17 @@ subscribe:
 
 Once the container is restarted Podderton will query any feeds that it finds, download them, and make a feed available (<http://127.0.0.1:9988/feeds.xml>) for you subscribe to via your podcast player of choice. Neat!
 
-If you look in your podcast directory you'll see a directory called `threebeansalad` with audio files gradually getting downloaded.
+If you look in your podcast directory you'll see `subscriptions/threebeansalad/episodes/` with audio files gradually getting downloaded, alongside `meta.json` (simplified feed metadata) and `source.json` (the raw upstream feed). Generated RSS lands in `feeds/`.
+
+### Public URL
+
+Enclosure URLs in the generated feeds are made absolute at request time from the
+`Host` header (and `X-Forwarded-Host` / `X-Forwarded-Proto` when behind a reverse
+proxy), so most setups need no configuration. To force a value, set `url`:
+
+```yaml
+url: https://podcasts.example.com
+```
 
 ### Filename formatting
 
@@ -64,8 +74,12 @@ subscribe:
     - name: Three Bean Salad
       id: threebeansalad
       url: https://podcast.global.com/show/5234547/episodes/feed
-      file_format: "{yyyy-mm-dd}.ext" # .ext will be replaced by whatever extension the feed provides.
+      file_format: "{yyyy-mm-dd}.ext" # .ext is replaced by whatever extension the feed provides.
 ```
+
+Available tokens: `{yyyy-mm-dd}`, `{yyyy}`, `{mm}`, `{dd}` (zero-padded),
+`{mmmm}`, `{dddd}` (not padded), `{title}`, `{description}`, `{episode}`,
+`{season}`. An unknown token falls back to `{title}.ext`.
 
 Want to alter the file format? Eeek, sorry, but Podderton isn't yet smart enough to rename already existing files. You'll need to handle that yourself.
 
@@ -122,14 +136,14 @@ webpage:
   display: false
 ```
 
-Don't want any outputted feeds?
+Don't want the custom feeds you defined under `generate.feeds`?
 
 ```yaml
 generate:
   feeds: false
 ```
 
-Want to disable the default output feed?
+Don't want any output feeds at all (no per-feed XML, no combined `feeds.xml`)?
 
 ```yaml
 generate:
@@ -154,10 +168,10 @@ generate:
 
 Podderton runs as two services:
 
-- **Subscriber**: checks configured feeds on a heartbeat interval, downloads new episodes, and writes a `.updated` signal file to the shared subscriptions volume when new content arrives.
-- **Generator**: detects the `.updated` signal file on its own heartbeat interval, regenerates RSS feeds when triggered, and serves HTTP on port 9988.
+- **Subscriber**: checks configured feeds on a heartbeat interval, downloads new episodes, and touches a `.updated` signal file on the shared subscriptions volume when new content arrives.
+- **Generator**: watches the timestamp of `.updated` on its own heartbeat interval, regenerates RSS feeds when it changes, and serves HTTP on port 9988.
 
-The two services communicate via a `.updated` file on the shared subscriptions volume — the subscriber writes it, the generator reads and deletes it.
+The two services communicate via the `.updated` file on the shared subscriptions volume — the subscriber writes it, the generator only reads its mtime, so the generator can mount the volume read-only.
 
 ## Development
 

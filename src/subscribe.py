@@ -1,9 +1,8 @@
 import config
 import files
+import json
 import os
 import feedparser
-import requests
-import pprint
 import validators
 import remote
 import utils
@@ -12,6 +11,14 @@ def subscriptions(configuration):
     """Get the subscriptions from the configuration."""
     # Extract the subscriptions from the configuration
     return configuration.get("subscribe", {}).get("feeds", [])
+
+def _episode_guid(json_path):
+    """Read the stored guid from an episode metadata file, or None."""
+    try:
+        with open(json_path) as f:
+            return json.load(f).get("guid")
+    except (OSError, ValueError):
+        return None
 
 def simplify_metadata(remote_feed, configured_feed):
     """Ensure the feed metadata exists."""
@@ -24,30 +31,25 @@ def simplify_metadata(remote_feed, configured_feed):
     data = {
         "title": remote_feed.title,
         "summary": remote_feed.summary,
-        "url": configured_feed['url']
+        "url": configured_feed['url'],
+        "author": remote_feed.get("author") or remote_feed.get("itunes_author"),
     }
 
     return data
 
 
+def fetch_feed(feed_url):
+    """Fetch and parse a feed once. Returns the feedparser result."""
+    return feedparser.parse(remote.get_file(feed_url))
+
 def get_meta(feed_url):
     """Fetch the feed metadata from the given feed URL."""
-    
-    response = requests.get(feed_url)
-    if response.status_code == 200:
-        return feedparser.parse(response.content).feed
-    else:
-        raise Exception(f"Failed to fetch {feed_url}: {response.status_code}")
-    
+    return fetch_feed(feed_url).feed
+
 def get_entries(feed_url):
     """Fetch the feed entries from the given feed URL."""
-    
-    response = requests.get(feed_url)
-    if response.status_code == 200:
-        return feedparser.parse(response.content).entries
-    else:
-        raise Exception(f"Failed to fetch {feed_url}: {response.status_code}")
-    
+    return fetch_feed(feed_url).entries
+
 def get_feed_image_url(meta):
     """Fetch the image from the given feed URL."""
 
@@ -71,7 +73,9 @@ def main(config_file):
 
 
     for configured_feed in configured_feeds:
-        feed_meta = get_meta(configured_feed.get("url"))
+        parsed = fetch_feed(configured_feed.get("url"))
+        feed_meta = parsed.feed
+        entries = parsed.entries
         feed_dir = os.path.join(subs_path, configured_feed.get("id"))
 
         if files.write_dir(feed_dir):
@@ -88,15 +92,14 @@ def main(config_file):
         if not os.path.exists(feed_image_path):
             feed_image_url = get_feed_image_url(feed_meta)
             if feed_image_url:
-                if files.write_image(remote.get_file(feed_image_url), feed_image_path):
-                    print(f"Artwork for {configured_feed.get('name')} written.")   
+                if files.write_bytes(remote.get_file(feed_image_url), feed_image_path):
+                    print(f"Artwork for {configured_feed.get('name')} written.")
 
 
         # Download episode audio files
         episodes_dir = os.path.join(feed_dir, "episodes")
         files.write_dir(episodes_dir)
         file_format = configured_feed.get("file_format", "{title}.ext")
-        entries = get_entries(configured_feed.get("url"))
 
         for entry in entries:
             # Find audio enclosure
@@ -125,18 +128,35 @@ def main(config_file):
 
             tokens = utils.define_string_tokens(entry)
             filename = utils.replace_string_tokens(file_format, tokens)
+            if '{' in filename or '}' in filename:
+                print(f"WARNING: unknown token in file_format {file_format!r}; using default")
+                filename = utils.replace_string_tokens("{title}.ext", tokens)
             filename = filename.replace('.ext', ext)
             # Sanitize filename
             for ch in ['/', '\\', ':', '*', '?', '"', '<', '>', '|']:
                 filename = filename.replace(ch, '_')
 
+            guid = getattr(entry, 'id', None) or audio_url
             filepath = os.path.join(episodes_dir, filename)
             if os.path.exists(filepath):
-                continue
+                existing = _episode_guid(os.path.splitext(filepath)[0] + '.json')
+                if existing is None or existing == guid:
+                    continue  # already have this episode (or a pre-guid download)
+                # Two distinct episodes resolve to the same filename — disambiguate.
+                stem_name, ext_name = os.path.splitext(filename)
+                n = 2
+                while True:
+                    filepath = os.path.join(episodes_dir, f"{stem_name} ({n}){ext_name}")
+                    if not os.path.exists(filepath):
+                        break
+                    if _episode_guid(os.path.splitext(filepath)[0] + '.json') == guid:
+                        break
+                    n += 1
+                if os.path.exists(filepath):
+                    continue
 
             try:
-                audio_data = remote.get_file(audio_url)
-                files.write_image(audio_data, filepath)
+                remote.download(audio_url, filepath)
                 print(f"Downloaded: {entry.title}")
                 any_downloaded = True
             except Exception as e:
@@ -164,6 +184,7 @@ def main(config_file):
                     'season': getattr(entry, 'itunes_season', None),
                     'audio_url': audio_url,
                     'image_url': episode_image_url,
+                    'guid': guid,
                 }
                 files.write_json(metadata, json_path)
                 print(f"Metadata saved: {entry.title}")
@@ -181,7 +202,7 @@ def main(config_file):
                             break
                 if episode_image_url:
                     try:
-                        files.write_image(remote.get_file(episode_image_url), art_path)
+                        files.write_bytes(remote.get_file(episode_image_url), art_path)
                         print(f"Artwork saved: {entry.title}")
                     except Exception as e:
                         print(f"Failed to download artwork for {entry.title}: {e}")

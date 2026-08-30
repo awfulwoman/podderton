@@ -160,11 +160,11 @@ def test_full_container_lifecycle():
             assert "<?xml" in content or "<rss" in content, \
                 f"Expected XML:\n{content[:500]}"
 
-            # podcasts volume: testfeed/ dir with at least one .mp3
-            testfeed_dir = podcasts_path / "testfeed"
-            assert testfeed_dir.is_dir(), "testfeed/ not found in podcasts volume"
-            mp3_files = list(testfeed_dir.glob("*.mp3"))
-            assert len(mp3_files) >= 1, f"No .mp3 in {testfeed_dir}"
+            # podcasts volume: subscriptions/testfeed/episodes/ with at least one .mp3
+            episodes_dir = podcasts_path / "subscriptions" / "testfeed" / "episodes"
+            assert episodes_dir.is_dir(), "subscriptions/testfeed/episodes/ not found in podcasts volume"
+            mp3_files = list(episodes_dir.glob("*.mp3"))
+            assert len(mp3_files) >= 1, f"No .mp3 in {episodes_dir}"
 
             # podcasts volume: feeds/ dir with at least one .xml
             feeds_dir = podcasts_path / "feeds"

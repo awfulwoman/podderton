@@ -8,6 +8,14 @@ import publish
 import server
 
 
+def _mtime(path):
+    """Return the mtime of path, or None if it does not exist."""
+    try:
+        return os.path.getmtime(path)
+    except OSError:
+        return None
+
+
 def main(config_file):
     cfg = config.file(config_file)
     interval = config.generate_interval(cfg)
@@ -18,6 +26,7 @@ def main(config_file):
 
     # Generate feeds once on startup
     publish.main(config_file)
+    last_seen = _mtime(signal_path)
 
     # Start HTTP server in a daemon thread
     t = threading.Thread(target=server.main, args=(config_file,), daemon=True)
@@ -26,10 +35,9 @@ def main(config_file):
 
     while True:
         time.sleep(interval)
-        if os.path.exists(signal_path):
-            with open(signal_path) as f:
-                signal_ts = f.read().strip()
-            os.remove(signal_path)
+        current = _mtime(signal_path)
+        if current is not None and current != last_seen:
+            last_seen = current
             publish.main(config_file)
             ts = datetime.now(timezone.utc).isoformat()
-            print(f"[{ts}] Feeds regenerated (triggered by update at {signal_ts})")
+            print(f"[{ts}] Feeds regenerated (signal updated at {current})")
