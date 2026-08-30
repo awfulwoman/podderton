@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import time
 import threading
@@ -7,8 +6,6 @@ import pytest
 import yaml
 import responses as responses_lib
 import requests
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../src"))
 
 import config
 import subscribe

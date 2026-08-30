@@ -1,10 +1,6 @@
-import os
-import sys
 import yaml
 import pytest
 import responses as responses_lib
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../src"))
 
 import subscribe
 

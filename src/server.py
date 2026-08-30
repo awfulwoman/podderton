@@ -7,11 +7,25 @@ from urllib.parse import unquote
 
 PORT = 9988
 _config_file = None
+_cfg_cache = {"key": None, "data": None}
 
 ITUNES_NS = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
 ET.register_namespace('itunes', ITUNES_NS)
 
 CHUNK = 65536
+
+
+def load_config():
+    """Read the config file, reparsing only when its path or mtime changes."""
+    try:
+        mtime = os.path.getmtime(_config_file)
+    except OSError:
+        mtime = None
+    key = (_config_file, mtime)
+    if _cfg_cache["key"] != key:
+        _cfg_cache["data"] = config.file(_config_file)
+        _cfg_cache["key"] = key
+    return _cfg_cache["data"]
 
 
 def get_mime(path):
@@ -178,7 +192,7 @@ class Handler(BaseHTTPRequestHandler):
         self.do_GET()
 
     def do_GET(self):
-        cfg = config.file(_config_file)
+        cfg = load_config()
         base_path = config.basepath(cfg)
         path = unquote(self.path.split('?')[0])
 

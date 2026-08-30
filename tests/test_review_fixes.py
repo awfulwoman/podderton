@@ -8,8 +8,6 @@
 """
 
 import json
-import os
-import sys
 import threading
 import time
 
@@ -17,8 +15,6 @@ import pytest
 import requests
 import responses as responses_lib
 import yaml
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../src"))
 
 import config
 import publish

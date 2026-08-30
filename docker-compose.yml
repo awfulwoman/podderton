@@ -19,6 +19,12 @@ services:
       - feeds:/feeds
     environment:
       - PODDERTON_PATH=/
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9988/', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
 volumes:
   subscriptions:

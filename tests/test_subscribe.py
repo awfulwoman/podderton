@@ -1,12 +1,9 @@
 import os
-import sys
 import json
 import types
 import pytest
 import responses as responses_lib
 import feedparser
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../src"))
 
 import subscribe
 
